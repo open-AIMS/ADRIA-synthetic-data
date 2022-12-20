@@ -9,7 +9,6 @@ import math
 from inspect import getsourcefile
 from os.path import abspath
 
-from sdv.timeseries import PAR
 from sdv import Metadata
 
 from scipy.io import loadmat
@@ -20,13 +19,13 @@ from sdv.metrics.tabular import LogisticDetection
 from sdv.metrics.timeseries import LSTMDetection, TSFCDetection
 
 from sdv.tabular import TVAE
+from sdv.lite import TabularPreset
 
 breakpoint()
 ### ----------------Load site data to synethesize------------------###
 data_set_folder = "Original Data"
-base_folder = abspath(getsourcefile(lambda: 0))
 site_data_geo = gp.read_file(
-    base_folder[:-7]+data_set_folder + "/Moore_2022-11-17/site_data/Moore_2022-11-17.gpkg")
+    data_set_folder+"\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.gpkg")
 
 # indicate whether to plot descriptive figs or not
 plot_figs = 0
@@ -42,13 +41,10 @@ site_data = site_data.drop('reef_siteid', axis=1)
 site_ids = pd.DataFrame(
     {'site_id': [i for i in range(1, len(site_data['site_id'])+1)]})
 site_data = site_data.drop('site_id', axis=1)
+site_data = site_data.drop('UNIQUE_ID', axis=1)
+breakpoint()
+site_data = site_data.drop('Reef', axis=1)
 site_data = pd.concat([site_ids, site_data], axis=1)
-
-# change categorical to strings
-for k in range(len(site_data['site_id'])):
-    site_data['Reef'][k] = str(site_data['Reef'][k])
-    site_data['habitat'][k] = str(site_data['habitat'][k])
-    site_data['rubble'][k] = str(site_data['rubble'][k])
 
 site_data['long'] = abs(site_data['long'])
 site_data['lat'] = abs(site_data['lat'])
@@ -57,26 +53,36 @@ metadata = {
     'fields': {
         'site_id': {'type': 'id', 'subtype': 'integer'},
         'habitat': {'type': 'categorical'},
-        'area': {'type': 'numerical', 'subtype': 'float'},
-        'benthic': {'type': 'categorical'},
-        'rubble': {'type': 'categorical'},
         'k': {'type': 'numerical', 'subtype': 'float'},
-        'sitedepth': {'type': 'numerical', 'subtype': 'float'},
-        'lat': {'type': 'numerical', 'subtype': 'float'},
-        'long': {'type': 'numerical', 'subtype': 'float'}
+        'area': {'type': 'numerical', 'subtype': 'float'},
+        'rubble': {'type': 'numerical', 'subtype': 'float'},
+        'sand': {'type': 'numerical', 'subtype': 'float'},
+        'rock': {'type': 'numerical', 'subtype': 'float'},
+        'coral_algae': {'type': 'numerical', 'subtype': 'float'},
+        'na_proportion': {'type': 'numerical', 'subtype': 'float'},
+        'depth_mean': {'type': 'numerical', 'subtype': 'float'},
+        'depth_sd': {'type': 'numerical', 'subtype': 'float'},
+        'depth_med': {'type': 'numerical', 'subtype': 'float'},
+        'zone_type': {'type': 'categorical'},
+        'long': {'type': 'numerical', 'subtype': 'float'},
+        'lat': {'type': 'numerical', 'subtype': 'float'}
     },
     'constraints': [],
     'primary_key': 'site_id'
 }
-
+breakpoint()
 ### ----------------Fit and save TVAE model for site data------------------###
 N = 300
 N2 = len(site_data['site_id'])
 # set up TVAE, fit and save
-model = TVAE(primary_key='site_id')
+# model = TVAE(primary_key='site_id')
+# model.fit(site_data)
+
+model = TabularPreset(name='FAST_ML', metadata=metadata)
 model.fit(site_data)
-model.save('site_data_brick_model.pkl')
-# model = TVAE.load('site_data_brick_model.pkl')
+model.save('site_data_synth_model.pkl')
+# model =TabularPreset.load('site_data_synth_model.pkl')
+# model = TVAE.load('site_data_synth_model.pkl')
 
 ### ----------------Sample data and test utility------------------###
 # create sample data
