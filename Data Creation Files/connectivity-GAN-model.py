@@ -1,10 +1,12 @@
 import os
 import pandas as pd
+import geopandas as gp
 import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import PowerTransformer, MinMaxScaler
 import tensorflow as tf
+from tensorflow import keras
 from keras.layers import Input, Dense, Dropout
 from keras import Model
 from keras.optimizers import Adam
@@ -16,17 +18,19 @@ from sdv.metrics.tabular import LogisticDetection
 from scipy import interpolate
 
 ### ----------------Load site data and connectivity data to synethesize------------------###
+data_set_folder = "Original Data"
+synth_data_set_folder = "Synthetic Data"
 conn_orig = pd.read_csv(
-    'C:/Users/rcrocker/Documents/datasets/data_packages/Moore/connectivity/2016/moore_d3_2016_transfer_probability_matrix_wide.csv')
-site_data = pd.read_csv(
-    "C:/Users/rcrocker/Documents/datasets/data_packages/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv")
-# conn_orig = pd.read_csv("example_connectivity_Moore.csv")
-# site_data = pd.read_csv("example_site_data_Moore.csv")
-site_data_synth = pd.read_csv("site_data_Moore_numsamps_28.csv")
+    data_set_folder+"\\Moore_2022-11-17\\connectivity\\2016\\connect_matrix_2016_3.csv", skiprows=3)
+site_data_geo = gp.read_file(
+    data_set_folder+"\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.gpkg")
+site_data_synth = pd.read_csv(
+    synth_data_set_folder+"\\site_data_"+data_set_folder+"_numsamps_29.csv")
 
 breakpoint()
-lats = site_data['lat']
-longs = site_data['long']
+site_data = site_data_geo[site_data_geo.columns[:-1]]
+lats = site_data_geo.centroid.x
+longs = site_data_geo.centroid.y
 
 
 # tidal distance function
@@ -42,8 +46,10 @@ def tide_dist(latlong_site1, latlong_site2):
 
 
 ### ----------------Preprocessing data and appending tidal distance matrices------------------###
+conn_orig.rename(columns={'Unnamed: 0': 'recieving_site'}, inplace=True)
 conn_data = conn_orig
-rec_sites = conn_orig['receiving_site']
+rec_sites = conn_orig['recieving_site']
+
 conn_data.drop(conn_data.columns[0], axis=1, inplace=True)
 # scaler_conn = MinMaxScaler().fit(conn_data)
 # conn_data = scaler_conn.transform(conn_data)
@@ -247,7 +253,7 @@ epochs = 5000+1
 learning_rate = 5e-4
 models_dir = 'model'
 
-conn_data[data_cols] = conn_data[data_cols]
+# conn_data[data_cols] = conn_data[data_cols]
 
 print(conn_data.shape[1])
 
@@ -293,7 +299,7 @@ evaluate(conn_samples, conn_data_full, metrics=['KSTest'])
 LogisticDetection.compute(conn_data_full, conn_samples)
 breakpoint()
 table_evaluator = TableEvaluator(conn_data_full[conn_data_full.keys()[
-                                 1:200]], conn_samples[conn_samples.keys()[1:200]])
+    1:200]], conn_samples[conn_samples.keys()[1:200]])
 table_evaluator.visual_evaluation()
 
 breakpoint()
