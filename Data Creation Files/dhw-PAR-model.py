@@ -1,4 +1,5 @@
 import pandas as pd
+import geopandas as gp
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.express as px
@@ -6,7 +7,8 @@ import plotly.graph_objects as go
 
 from deepecho import PARModel
 from deepecho.models.basic_gan import BasicGANModel
-from scipy.io import loadmat
+# from scipy.io import netcdf
+import netCDF4
 from sdv.evaluation import evaluate
 from sdv.metrics.tabular import LogisticDetection
 from sdv.metrics.timeseries import LSTMDetection
@@ -14,18 +16,18 @@ from sdv.metrics.timeseries import LSTMDetection
 from scipy import interpolate
 from sklearn.neighbors import NearestNeighbors
 
-
+breakpoint()
 ### ----------------Load site data and dhw data to synethesize------------------###
-DHW_45 = loadmat(
-    'C:/Users/rcrocker/Documents/datasets/data_packages/Moore/DHWs/NewDHWs/DHWexp_v2_0_Moore_45.mat')
-site_data = pd.read_csv(
-    "C:/Users/rcrocker/Documents/datasets/data_packages/Moore/site_data/MooreReefCluster_Spatial_w4.5covers.csv")
-site_data_synth = pd.read_csv("site_data_Moore_numsamps_28.csv")
+data_set_folder = "Original Data"
+synth_data_set_folder = "Synthetic Data"
+DHW_45 = netCDF4.Dataset(
+    data_set_folder+"\\Moore_2022-11-17\\DHWs\\dhwRCP45.nc", 'r')
+
+site_data_synth = pd.read_csv(
+    synth_data_set_folder+"\\site_data_Original Data_numsamps_29.csv")
 
 ### ----------------Reshape data to fit PAR model------------------###
-nyears = DHW_45['DHWdatacube'].shape[0]
-nsites = DHW_45['DHWdatacube'].shape[1]
-nreps = DHW_45['DHWdatacube'].shape[2]
+nyears, nsites, nreps = DHW_45['dhw'].shape
 size = nyears*nsites
 
 entity_columns = ['Site']
@@ -33,8 +35,8 @@ context_columns = ['Lat', 'Long']
 sequence_index = 'Year'
 breakpoint()
 
-lats = site_data.lat
-longs = site_data.long
+lats = DHW_45['latitude'][:]
+longs = DHW_45['longitude'][:]
 dhw_45_df = pd.DataFrame({"Year": [0]*size, "Lat": [0.0]*size,
                          "Long": [0.0]*size, "Site": [0]*size, "Dhw": [0.0]*size})
 
@@ -46,8 +48,8 @@ for yr in range(nyears):
         dhw_45_df['Lat'][count] = lats[si]
         dhw_45_df['Long'][count] = longs[si]
         dhw_45_df['Site'][count] = si+1
-        dhw_45_df['Dhw'][count] = DHW_45['DHWdatacube'][yr,
-                                                        si, np.random.randint(nreps-1)]
+        dhw_45_df['Dhw'][count] = DHW_45['dhw'][yr,
+                                                si, np.random.randint(nreps-1)]
         count += 1
 
 data_types = {
@@ -199,49 +201,49 @@ for nn in range(len(nearest_sites)):
     selected_dhws[nn, :] = new_data_dhw['Dhw'][nearest_sites[nn]]
 
 breakpoint()
-### ------------ test GAN model for time series for dhw data-------------###
+# ### ------------ test GAN model for time series for dhw data-------------###
 
-sequences = []
-for si in range(nsites):
-    data_tmp = [[DHW_45['DHWdatacube']
-                 [k, si, np.random.randint(nreps-1)] for k in range(nyears)]]
-    dict_tmp = {
-        'context': [si],
-        'data': data_tmp
-    }
-    sequences.append(dict_tmp)
+# sequences = []
+# for si in range(nsites):
+#     data_tmp = [[DHW_45['dhw']
+#                  [k, si, np.random.randint(nreps-1)] for k in range(nyears)]]
+#     dict_tmp = {
+#         'context': [si],
+#         'data': data_tmp
+#     }
+#     sequences.append(dict_tmp)
 
-context_types = ['categorical']
-data_types = ['continuous']
-breakpoint()
-model = BasicGANModel(epochs=1024, cuda=False)
-model.fit_sequences(sequences, context_types, data_types)
+# context_types = ['categorical']
+# data_types = ['continuous']
+# breakpoint()
+# model = BasicGANModel(epochs=1024, cuda=False)
+# model.fit_sequences(sequences, context_types, data_types)
 
-breakpoint()
-dhw_45_df = pd.DataFrame(
-    {"Year": [0.0]*size, "Site": [0.0]*size, "Dhw": [0.0]*size})
-dhw_45_df_synth = pd.DataFrame(
-    {"Year": [0.0]*size, "Site": [0.0]*size, "Dhw": [0.0]*size})
+# breakpoint()
+# dhw_45_df = pd.DataFrame(
+#     {"Year": [0.0]*size, "Site": [0.0]*size, "Dhw": [0.0]*size})
+# dhw_45_df_synth = pd.DataFrame(
+#     {"Year": [0.0]*size, "Site": [0.0]*size, "Dhw": [0.0]*size})
 
-count = 0
+# count = 0
 
-for si in range(nsites):
-    temp_seq = model.sample_sequence([si], sequence_length=74)
-    for yr in range(nyears):
+# for si in range(nsites):
+#     temp_seq = model.sample_sequence([si], sequence_length=74)
+#     for yr in range(nyears):
 
-        dhw_45_df['Year'][count] = str(yr+2025)
-        dhw_45_df['Site'][count] = si+1
-        dhw_45_df['Dhw'][count] = sequences[si]['data'][0][yr]
+#         dhw_45_df['Year'][count] = str(yr+2025)
+#         dhw_45_df['Site'][count] = si+1
+#         dhw_45_df['Dhw'][count] = sequences[si]['data'][0][yr]
 
-        dhw_45_df_synth['Year'][count] = str(yr+2025)
-        dhw_45_df_synth['Site'][count] = si+1
-        dhw_45_df_synth['Dhw'][count] = temp_seq[0][yr]
+#         dhw_45_df_synth['Year'][count] = str(yr+2025)
+#         dhw_45_df_synth['Site'][count] = si+1
+#         dhw_45_df_synth['Dhw'][count] = temp_seq[0][yr]
 
-        count += 1
+#         count += 1
 
-breakpoint()
-evaluate(dhw_45_df_synth, dhw_45_df, metrics=['KSTest'], aggregate=False)
-LogisticDetection.compute(dhw_45_df, dhw_45_df_synth)
-LSTMDetection.compute(dhw_45_df, dhw_45_df_synth, metadata_dhw)
+# breakpoint()
+# evaluate(dhw_45_df_synth, dhw_45_df, metrics=['KSTest'], aggregate=False)
+# LogisticDetection.compute(dhw_45_df, dhw_45_df_synth)
+# LSTMDetection.compute(dhw_45_df, dhw_45_df_synth, metadata_dhw)
 
 breakpoint()
