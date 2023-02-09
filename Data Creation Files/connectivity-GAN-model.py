@@ -16,7 +16,7 @@ from table_evaluator import load_data, TableEvaluator
 #from sdv.metrics.tabular import LogisticDetection
 
 from scipy import interpolate
-
+from sklearn.neighbors import NearestNeighbors
 ### ----------------Load site data and connectivity data to synethesize------------------###
 data_set_folder = "Original Data"
 synth_data_set_folder = "Synthetic Data"
@@ -303,29 +303,33 @@ conn_data_full = pd.DataFrame(scaler.inverse_transform(conn_data[data_cols[1:]])
 # ax = plt.imshow(conn_samples[conn_samples.keys()[1:20]][0:19] ,interpolation = 'nearest')
 # plt.show()
 
-evaluate(conn_samples, conn_data_full, metrics=["KSTest"])
-LogisticDetection.compute(conn_data_full, conn_samples)
+#evaluate(conn_samples, conn_data_full, metrics=["KSTest"])
+#LogisticDetection.compute(conn_data_full, conn_samples)
 breakpoint()
-table_evaluator = TableEvaluator(conn_data_full[conn_data_full.keys()[1:200]],conn_samples[conn_samples.keys()[1:200]],)
-table_evaluator.visual_evaluation()
- 
-breakpoint()
-# interpolate connectivity onto sythetic site data lats and longs
-synth_lats = site_data_synth["lat"]
-synth_longs = site_data_synth["long"]
-n_sites_synth = len(synth_lats)
-synth_east_west = np.zeros((n_sites_synth, n_sites_synth))
-synth_north_south = np.zeros((n_sites_synth, n_sites_synth))
-
-for i in range(n_sites_synth):
-    for j in range(n_sites_synth):
-        synth_east_west[i, j] = tide_dist(synth_longs[i], synth_longs[j])
-        synth_north_south[i, j] = tide_dist(synth_lats[i], synth_lats[j])
+#table_evaluator = TableEvaluator(conn_data_full[conn_data_full.keys()[1:200]],conn_samples[conn_samples.keys()[1:200]],)
+#table_evaluator.visual_evaluation()
 
 breakpoint()
-east_west_samps = conn_samples[east_west_cols]
-north_south_samps = conn_samples[north_south_cols]
-conn_samps = conn_samples[conn_orig.columns]
-fun = interpolate.interp2d(
-    east_west_samps.values, north_south_samps.values, conn_samps.values, kind="linear"
-)
+
+synth_lats = site_data_synth['lat']
+synth_longs = site_data_synth['long']
+samples = np.zeros((len(conn_samples.lats), 2))
+site_data_vals = np.zeros((len(synth_lats), 2))
+
+for l in range(len(conn_samples.lats)):
+    samples[l][:] = [conn_samples.longs[l], conn_samples.lats[l]]
+
+breakpoint()
+neigh = NearestNeighbors(n_neighbors=1)
+neigh.fit(samples)
+breakpoint()
+
+for k in range(len(synth_lats)):
+    site_data_vals[k][:] = [-synth_lats[k], synth_longs[k]]
+breakpoint()
+nearest_sites = neigh.kneighbors(site_data_vals, return_distance=False)
+nearest_site_inds = [nearest_sites[kk][0] for kk in range(len(nearest_sites))]
+selected_conn_data = np.zeros(len(nearest_site_inds),len(nearest_site_inds))
+conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
+selected_conn_data = conn_samples_array[nearest_site_inds,:]
+
