@@ -110,12 +110,11 @@ keys = [k for k in outcomes_data.keys()]
 outcomes_synth = outcomes_data
 quantiles = [97.5, 25, 87.5, 12.5, 75, 25, 62.5, 37.5]
 
-
+breakpoint()
 for y in range(nyears):
 
-    data_temp = dhw_45_df['Dhw'][old_years == str(y+2025)]
-    synth_data_temp = new_data_dhw['Dhw'][np.transpose(
-        new_years) == str(y+2025)]
+    data_temp = dhw_45_df['Dhw'][old_years == y+2025]
+    synth_data_temp = new_data_dhw['Dhw'][np.transpose(new_years) == str(y+2025)]
     data_percentile_temp = np.percentile(data_temp, quantiles)
     synth_data_percentile_temp = np.percentile(synth_data_temp, quantiles)
 
@@ -201,49 +200,5 @@ for nn in range(len(nearest_sites)):
     selected_dhws[nn, :] = new_data_dhw['Dhw'][nearest_sites[nn]]
 
 breakpoint()
-# ### ------------ test GAN model for time series for dhw data-------------###
 
-# sequences = []
-# for si in range(nsites):
-#     data_tmp = [[DHW_45['dhw']
-#                  [k, si, np.random.randint(nreps-1)] for k in range(nyears)]]
-#     dict_tmp = {
-#         'context': [si],
-#         'data': data_tmp
-#     }
-#     sequences.append(dict_tmp)
 
-# context_types = ['categorical']
-# data_types = ['continuous']
-# breakpoint()
-# model = BasicGANModel(epochs=1024, cuda=False)
-# model.fit_sequences(sequences, context_types, data_types)
-
-# breakpoint()
-# dhw_45_df = pd.DataFrame(
-#     {"Year": [0.0]*size, "Site": [0.0]*size, "Dhw": [0.0]*size})
-# dhw_45_df_synth = pd.DataFrame(
-#     {"Year": [0.0]*size, "Site": [0.0]*size, "Dhw": [0.0]*size})
-
-# count = 0
-
-# for si in range(nsites):
-#     temp_seq = model.sample_sequence([si], sequence_length=74)
-#     for yr in range(nyears):
-
-#         dhw_45_df['Year'][count] = str(yr+2025)
-#         dhw_45_df['Site'][count] = si+1
-#         dhw_45_df['Dhw'][count] = sequences[si]['data'][0][yr]
-
-#         dhw_45_df_synth['Year'][count] = str(yr+2025)
-#         dhw_45_df_synth['Site'][count] = si+1
-#         dhw_45_df_synth['Dhw'][count] = temp_seq[0][yr]
-
-#         count += 1
-
-# breakpoint()
-# evaluate(dhw_45_df_synth, dhw_45_df, metrics=['KSTest'], aggregate=False)
-# LogisticDetection.compute(dhw_45_df, dhw_45_df_synth)
-# LSTMDetection.compute(dhw_45_df, dhw_45_df_synth, metadata_dhw)
-
-breakpoint()
