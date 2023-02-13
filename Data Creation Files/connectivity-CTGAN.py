@@ -16,8 +16,8 @@ conn_orig = pd.read_csv(
     + "\\Moore_2022-11-17\\connectivity\\2015\\connect_matrix_2015_3.csv",
     skiprows=3,
 )
-site_data_geo = gp.read_file(
-    data_set_folder + "\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.gpkg"
+site_data = pd.read_csv(
+    data_set_folder + "\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.csv"
 )
 site_data_synth = pd.read_csv(
     synth_data_set_folder + "\\site_data_" + data_set_folder + "_numsamps_29.csv"
