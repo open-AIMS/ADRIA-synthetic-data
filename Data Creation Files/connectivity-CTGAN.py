@@ -1,11 +1,11 @@
 import os
 import pandas as pd
-import geopandas as gp
+#import geopandas as gp
 import numpy as np
 
-# from sdv.tabular import CTGAN
-import ctgan
-from sklearn.preprocessing import PowerTransformer, MinMaxScaler
+from sdv.tabular import CTGAN
+#import ctgan
+#from sklearn.preprocessing import PowerTransformer, MinMaxScaler
 from sdv.evaluation import evaluate
 
 breakpoint()
@@ -25,10 +25,11 @@ site_data_synth = pd.read_csv(
 
 breakpoint()
 
-site_data = site_data_geo[site_data_geo.columns[:-1]]
-lats = site_data_geo.centroid.x
-longs = site_data_geo.centroid.y
-
+# site_data = site_data_geo[site_data_geo.columns[:-1]]
+# lats = site_data_geo.centroid.x
+# longs = site_data_geo.centroid.y
+lats = site_data.lats
+longs = site_data.longs
 
 # tidal distance function
 def tide_dist(latlong_site1, latlong_site2):
@@ -48,8 +49,8 @@ conn_data = conn_orig
 rec_sites = conn_orig["recieving_site"]
 
 conn_data.drop(conn_data.columns[0], axis=1, inplace=True)
-scaler_conn = MinMaxScaler().fit(conn_data)
-conn_data = scaler_conn.transform(conn_data)
+#scaler_conn = MinMaxScaler().fit(conn_data)
+#conn_data = scaler_conn.transform(conn_data)
 conn_data = pd.DataFrame(conn_data, columns=conn_orig.columns)
 print(conn_data.isnull().values.any())
 conn_data.fillna(0)
@@ -80,20 +81,20 @@ conn_data = pd.concat([conn_data, lats, longs, east_west, north_south], axis=1)
 conn_data.columns = conn_data.columns.astype(str)
 cols = conn_data.columns
 breakpoint()
-scaler = MinMaxScaler().fit(conn_data)
-conn_data = scaler.transform(conn_data)
+#scaler = MinMaxScaler().fit(conn_data)
+#conn_data = scaler.transform(conn_data)
 conn_data = pd.DataFrame(conn_data, columns=cols)
 conn_data = pd.concat([rec_sites, conn_data], axis=1)
 conn_data.rename(columns={0: "recieving_site"}, inplace=True)
 breakpoint()
-discrete_columns = ["recieving_site"]
-ctgan_mod = ctgan.CTGAN(batch_size=50, epochs=5, verbose=False)
-ctgan_mod.fit(conn_data, discrete_columns)
-# model = CTGAN(primary_key="recieving_site")
-conn_sample = ctgan_mod.sample(conn_data.shape[0])
-conn_sample_trans = pd.DataFrame(
-    scaler.inverse_transform(conn_sample[cols]), columns=cols
-)
+#discrete_columns = ["recieving_site"]
+#ctgan_mod = CTGAN(batch_size=50, epochs=5, verbose=False)
+#ctgan_mod.fit(conn_data, discrete_columns)
+st_model = CTGAN(primary_key="recieving_site")
+conn_sample = st_model.fit(conn_data)
+# conn_sample_trans = pd.DataFrame(
+#     scaler.inverse_transform(conn_sample[cols]), columns=cols
+# )
 
 breakpoint()
-evaluate(conn_sample_trans[cols[1:216]], conn_orig)
+evaluate(conn_sample[cols[1:216]], conn_orig)
