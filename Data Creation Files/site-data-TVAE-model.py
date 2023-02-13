@@ -1,27 +1,18 @@
 import pandas as pd
 import geopandas as gp
-import matplotlib.pyplot as plt
-import numpy as np
-import plotly.express as px
-import seaborn as sns
-import random as rn
-import math
-from inspect import getsourcefile
-from os.path import abspath
 
-from sdv import Metadata
-
-from scipy.io import loadmat
 from sdv.evaluation import evaluate
-from sdv.metrics.tabular import BNLikelihood
-from sdv.metrics.tabular import LogisticDetection
-
-from sdv.metrics.timeseries import LSTMDetection, TSFCDetection
+from sdv.metrics.tabular import BNLikelihood,LogisticDetection
+from sdv.metrics.timeseries import LSTMDetection
 
 from sdv.tabular import TVAE
 from sdv.lite import TabularPreset
 
+import preprocess_functions
+from data_comparison_plots import plot_comparison_scatter, plot_comparison_hist
+from sample_sites_functions import sample_rand_radii
 breakpoint()
+
 ### ----------------Load site data to synethesize------------------###
 data_set_folder = "Original Data"
 site_data_geo = gp.read_file(
@@ -32,44 +23,8 @@ plot_figs = 0
 
 ### ----------------Preprocess data for sdv.TVAE model fit------------------###
 # simplify to dataframe
-site_data = site_data_geo[site_data_geo.columns[:-1]]
-site_data["long"] = site_data_geo.centroid.x
-site_data["lat"] = site_data_geo.centroid.y
+site_data, metadata = preprocess_functions.preprocess_site_data(site_data_geo)
 
-# get rid of identifying ids
-site_data = site_data.drop('reef_siteid', axis=1)
-site_ids = pd.DataFrame(
-    {'site_id': [i for i in range(1, len(site_data['site_id'])+1)]})
-site_data = site_data.drop('site_id', axis=1)
-site_data = site_data.drop('UNIQUE_ID', axis=1)
-breakpoint()
-site_data = site_data.drop('Reef', axis=1)
-site_data = pd.concat([site_ids, site_data], axis=1)
-
-site_data['long'] = abs(site_data['long'])
-site_data['lat'] = abs(site_data['lat'])
-# define table metadata
-metadata = {
-    'fields': {
-        'site_id': {'type': 'id', 'subtype': 'integer'},
-        'habitat': {'type': 'categorical'},
-        'k': {'type': 'numerical', 'subtype': 'float'},
-        'area': {'type': 'numerical', 'subtype': 'float'},
-        'rubble': {'type': 'numerical', 'subtype': 'float'},
-        'sand': {'type': 'numerical', 'subtype': 'float'},
-        'rock': {'type': 'numerical', 'subtype': 'float'},
-        'coral_algae': {'type': 'numerical', 'subtype': 'float'},
-        'na_proportion': {'type': 'numerical', 'subtype': 'float'},
-        'depth_mean': {'type': 'numerical', 'subtype': 'float'},
-        'depth_sd': {'type': 'numerical', 'subtype': 'float'},
-        'depth_med': {'type': 'numerical', 'subtype': 'float'},
-        'zone_type': {'type': 'categorical'},
-        'long': {'type': 'numerical', 'subtype': 'float'},
-        'lat': {'type': 'numerical', 'subtype': 'float'}
-    },
-    'constraints': [],
-    'primary_key': 'site_id'
-}
 breakpoint()
 ### ----------------Fit and save TVAE model for site data------------------###
 N = 300
@@ -100,41 +55,7 @@ LogisticDetection.compute(site_data, new_data_site_data)
 breakpoint()
 ### ----------------Re-sample using conditional sampling to emulated site spatial clustering------------------###
 N3 = 30
-# randomly select 5 points in the synthetic data set
-nrand_sites = 10
-rand_sites = np.random.randint(
-    0, len(new_data_site_data.lat), size=(1, nrand_sites))[0]
-max_lat = max(new_data_site_data.lat)
-min_lat = min(new_data_site_data.lat)
-max_long = max(new_data_site_data.long)
-min_long = min(new_data_site_data.long)
-lats = new_data_site_data.lat[rand_sites]
-longs = new_data_site_data.long[rand_sites]
-
-rand_lats = []
-rand_longs = []
-R = 0.01
-# generate random radii and theta around these points
-rand_radii = np.sqrt(np.random.uniform(0, 1, size=(1, N3))[0])*R
-rand_theta = 2*math.pi*np.random.uniform(0, 1, size=(1, N3))[0]
-
-breakpoint()
-for rr in range(len(rand_radii)):
-    site = np.random.randint(0, nrand_sites-1, size=(1, 1))[0]
-    rlat_temp = lats[rand_sites[site]] + \
-        rand_radii[rr] * np.cos(rand_theta[rr])
-    if rlat_temp[rand_sites[site][0]] < max_lat and rlat_temp[rand_sites[site][0]] > min_lat:
-        rand_lats.append(rlat_temp[rand_sites[site][0]])
-    rlong_temp = longs[rand_sites[site]] + \
-        rand_radii[rr] * np.sin(rand_theta[rr])
-    if rlong_temp[rand_sites[site][0]] < max_long and rlong_temp[rand_sites[site][0]] > min_long:
-        rand_longs.append(rlong_temp[rand_sites[site][0]])
-
-breakpoint()
-nsites_samp = min(len(rand_lats), len(rand_longs))
-conditions = pd.DataFrame(
-    {'lat': rand_lats[0:nsites_samp], 'long': rand_longs[0:nsites_samp]})
-breakpoint()
+conditions = sample_rand_radii(new_data_site_data,10,N3)
 sample_sites = model.sample_remaining_columns(conditions)
 
 # evaluate Chi-squared and K-S score
@@ -148,92 +69,14 @@ LogisticDetection.compute(site_data, sample_sites)
 breakpoint()
 N3 = sample_sites.shape[0]
 if plot_figs == 1:
-    fig1, axes = plt.subplots(1, 3)
-    l1 = axes[0].scatter(new_data_site_data['lat'], new_data_site_data['long'],
-                         s=new_data_site_data['k'], c=new_data_site_data['area'])
-    l2 = axes[1].scatter(site_data['lat'], -site_data['long'],
-                         s=site_data['k'], c=site_data['area'])
-    l3 = axes[2].scatter(sample_sites['lat'], -sample_sites['long'],
-                         s=sample_sites['k'], c=sample_sites['area'])
-    axes[1].set_title('Original')
-    axes[0].set_title('Synthetic')
-    axes[2].set_title('Sampled')
-    axes[1].set(xlabel='lat', ylabel='long')
-    axes[0].set(xlabel='lat', ylabel='long')
-    axes[2].set(xlabel='lat', ylabel='long')
-    fig1.show()
+    fig1, axes = plot_comparison_scatter(sample_sites,new_data_site_data,site_data,'area','k')
 
-    fig2, axes = plt.subplots(1, 3)
-    axes[0].hist(new_data_site_data['area'], bins=round(np.sqrt(N)))
-    axes[1].hist(site_data['area'], bins=round(np.sqrt(N2)))
-    axes[2].hist(sample_sites['area'], bins=round(np.sqrt(N3)))
-    axes[1].set_title('Original')
-    axes[0].set_title('Synthetic')
-    axes[2].set_title('Sampled')
-    axes[1].set(xlabel='site area', ylabel='counts')
-    axes[0].set(xlabel='site_area', ylabel='counts')
-    axes[2].set(xlabel='site_area', ylabel='counts')
-    fig2.show()
-
-    fig3, axes = plt.subplots(1, 3)
-    axes[0].hist(new_data_site_data['k'], bins=round(np.sqrt(N)))
-    axes[1].hist(site_data['k'], bins=round(np.sqrt(N2)))
-    axes[2].hist(sample_sites['k'], bins=round(np.sqrt(N3)))
-    axes[1].set_title('Original')
-    axes[0].set_title('Synthetic')
-    axes[2].set_title('Sampled')
-    axes[2].set(xlabel='k', ylabel='counts')
-    axes[1].set(xlabel='k', ylabel='counts')
-    axes[0].set(xlabel='k', ylabel='counts')
-    fig3.show()
-
-    fig4, axes = plt.subplots(1, 3)
-    axes[0].hist(new_data_site_data['Reef'])
-    axes[1].hist(site_data['Reef'])
-    axes[2].hist(sample_sites['Reef'])
-    axes[1].set_title('Original')
-    axes[2].set_title('Sampled')
-    axes[0].set_title('Synthetic')
-    axes[1].set(xlabel='Reef', ylabel='counts')
-    axes[2].set(xlabel='Reef', ylabel='counts')
-    axes[0].set(xlabel='Reef', ylabel='counts')
-    fig4.show()
-
-    fig5, axes = plt.subplots(1, 3)
-    axes[0].hist(new_data_site_data['habitat'])
-    axes[1].hist(site_data['habitat'])
-    axes[2].hist(sample_sites['habitat'])
-    axes[1].set_title('Original')
-    axes[0].set_title('Synthetic')
-    axes[2].set_title('Sampled')
-    axes[1].set(xlabel='habitat', ylabel='counts')
-    axes[2].set(xlabel='habitat', ylabel='counts')
-    axes[0].set(xlabel='habitat', ylabel='counts')
-    fig5.show()
-
-    fig6, axes = plt.subplots(1, 3)
-    axes[0].hist(new_data_site_data['sitedepth'])
-    axes[1].hist(site_data['sitedepth'])
-    axes[2].hist(sample_sites['sitedepth'])
-    axes[1].set_title('Original')
-    axes[2].set_title('Sampled')
-    axes[0].set_title('Synthetic')
-    axes[1].set(xlabel='site_depth', ylabel='counts')
-    axes[2].set(xlabel='site_depth', ylabel='counts')
-    axes[0].set(xlabel='site_depth', ylabel='counts')
-    fig6.show()
-
-    fig7, axes = plt.subplots(1, 3)
-    axes[0].hist(new_data_site_data['rubble'])
-    axes[1].hist(site_data['rubble'])
-    axes[2].hist(sample_sites['rubble'])
-    axes[1].set_title('Original')
-    axes[2].set_title('Sampled')
-    axes[0].set_title('Synthetic')
-    axes[1].set(xlabel='rubble', ylabel='counts')
-    axes[0].set(xlabel='rubble', ylabel='counts')
-    axes[2].set(xlabel='rubble', ylabel='counts')
-    fig7.show()
+    fig2, axes = plot_comparison_hist(sample_sites,new_data_site_data,site_data,'area')
+    fig3, axes = plot_comparison_hist(sample_sites,new_data_site_data,site_data,'k')
+    fig4, axes = plot_comparison_hist(sample_sites,new_data_site_data,site_data,'Reef')
+    fig5, axes = plot_comparison_hist(sample_sites,new_data_site_data,site_data,'habitat')
+    fig6, axes = plot_comparison_hist(sample_sites,new_data_site_data,site_data,'sitedepth')
+    fig7, axes = plot_comparison_hist(sample_sites,new_data_site_data,site_data,'rubble')
 
 sample_sites.to_csv('site_data_'+data_set_folder +
-                    '_numsamps_'+str(nsites_samp)+'.csv')
+                    '_numsamps_'+str(N3)+'.csv')
