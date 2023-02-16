@@ -1,17 +1,18 @@
 import os
 import pandas as pd
-#import geopandas as gp
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 from table_evaluator import load_data, TableEvaluator
+from sdmetrics.reports.single_table import QualityReport
 #from sdv.evaluation import evaluate
 #from sdv.metrics.tabular import LogisticDetection
 
 import preprocess_functions
 import GAN_model
-from sklearn.neighbors import NearestNeighbors
-### ----------------Load site data and connectivity data to synethesize------------------###
+from sample_sites_functions import find_NN_conn_data
+### -----------------------------Load site data and connectivity data to synethesize----------------------------###
 data_set_folder = "Original Data"
 synth_data_set_folder = "Synthetic Data"
 conn_orig = pd.read_csv(
@@ -27,9 +28,9 @@ site_data_synth = pd.read_csv(
 )
 
 breakpoint()
-conn_data, conn_orig, scaler =  preprocess_functions.reprocess_conn_data(site_data,conn_orig)
+conn_data, conn_orig, scaler, metadata_conn =  preprocess_functions.reprocess_conn_data(site_data,conn_orig)
 
-### ----------------Train GAN model------------------###
+### ---------------------------------------Train GAN model-------------------------------------------------------###
 # define the training parameters for the GAN network
 data_cols = conn_data.columns
 breakpoint()
@@ -72,7 +73,8 @@ breakpoint()
 seed = 17
 test_size = 200  # number of sites
 noise_dim = 32
-### ----------------Sample data and transform to original data space------------------###
+
+### -----------------------------Sample data and transform to original data space--------------------------------###
 np.random.seed(seed)
 real = synthesizer.get_data_batch(train=conn_data, batch_size=test_size, seed=seed)
 real_samples = pd.DataFrame(real, columns=data_cols)
@@ -82,34 +84,17 @@ conn_data_full = pd.DataFrame(scaler.inverse_transform(conn_data[data_cols[1:]])
 # plt.show()
 # ax = plt.imshow(conn_samples[conn_samples.keys()[1:20]][0:19] ,interpolation = 'nearest')
 # plt.show()
-
+### ------------------------------------Test synthetic data utility--------------------------------------------###
+report = QualityReport()
+report.generate(conn_orig, conn_samples[:,conn_orig.columns], metadata_conn)
+report.get_details(property_name='Column Shapes')
+report.get_details(property_name='Pair Trends')
 #evaluate(conn_samples, conn_data_full, metrics=["KSTest"])
 #LogisticDetection.compute(conn_data_full, conn_samples)
 breakpoint()
 #table_evaluator = TableEvaluator(conn_data_full[conn_data_full.keys()[1:200]],conn_samples[conn_samples.keys()[1:200]],)
 #table_evaluator.visual_evaluation()
+### -------------------------------Select conn data closest to site data spatially-------------------------------###
 
-breakpoint()
-
-synth_lats = site_data_synth['lat']
-synth_longs = site_data_synth['long']
-samples = np.zeros((len(conn_samples.lats), 2))
-site_data_vals = np.zeros((len(synth_lats), 2))
-
-for l in range(len(conn_samples.lats)):
-    samples[l][:] = [conn_samples.longs[l], conn_samples.lats[l]]
-
-breakpoint()
-neigh = NearestNeighbors(n_neighbors=1)
-neigh.fit(samples)
-breakpoint()
-
-for k in range(len(synth_lats)):
-    site_data_vals[k][:] = [-synth_lats[k], synth_longs[k]]
-breakpoint()
-nearest_sites = neigh.kneighbors(site_data_vals, return_distance=False)
-nearest_site_inds = [nearest_sites[kk][0] for kk in range(len(nearest_sites))]
-selected_conn_data = np.zeros(len(nearest_site_inds),len(nearest_site_inds))
-conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
-selected_conn_data = conn_samples_array[nearest_site_inds,:]
+selected_conn_data = find_NN_conn_data(site_data_synth,conn_samples,conn_orig)
 
