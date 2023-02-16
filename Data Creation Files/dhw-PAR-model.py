@@ -45,16 +45,6 @@ new_data_dhw['Year'] = new_years
 
 ### ----------------------------------------------Evaluate data --------------------------------------------------###
 
-# create metadata dictionary
-metadata_dhw = {'fields': {'Year': {'type': 'datetime'},
-                            'Lat': {'type': 'numerical', 'subtype': 'float'},
-                            'Long': {'type': 'numerical', 'subtype': 'float'},
-                            'Site': {'type': 'categorical'},
-                            'Dhw': {'type': 'numerical', 'subtype': 'float'}},
-                 'context_columns': ['Site'],
-                 'entity_columns': ['Lat', 'Long'],
-                 'sequence_index': 'Year'}
-
 # detection values should be low
 LogisticDetection.compute(dhw_45_df, new_data_dhw)
 LSTMDetection.compute(dhw_45_df, new_data_dhw, metadata_dhw)
