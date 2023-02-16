@@ -1,10 +1,11 @@
+import os
 from sklearn.preprocessing import PowerTransformer, MinMaxScaler
 import tensorflow as tf
 from tensorflow import keras
 from keras.layers import Input, Dense, Dropout
 from keras import Model
 from keras.optimizers import Adam
-
+import numpy as np
 ### ----------------GAN model definitions------------------###
 # define the GAN model (taken from GitHub repo :https://github.com/ydataai/ydata-synthetic )
 
