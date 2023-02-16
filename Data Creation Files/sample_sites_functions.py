@@ -3,7 +3,15 @@ import math
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 
-def sample_rand_radii(new_site_data,nrand_sites,n_gen):
+def sample_rand_radii(new_site_data, nrand_sites, n_gen):
+    """
+   Calculate new site lats and longs within randomised 
+   radius, within the same domain as old sites.
+
+   :param dataframe new_site_data: synthetic site data.
+   :param int nrand_sites: number of site positions to generate.
+   :param int n_gen: number of sites to generate around site positions.
+   """
     rand_sites = np.random.randint(
         0, len(new_site_data.lat), size=(1, nrand_sites))[0]
     max_lat = max(new_site_data.lat)
@@ -38,6 +46,13 @@ def sample_rand_radii(new_site_data,nrand_sites,n_gen):
     return conditions
 
 def find_NN_dhw_data(site_data_synth,new_data_dhw,nyears):
+    """
+   Find closest neighbours in synthetic dhw data to synthetic site_data.
+
+   :param dataframe site_data_synth: synthetic site data.
+   :param dataframe new_data_dhw: synthetic dhw data.
+   :param int n_gen: number of sites to generate around site positions.
+   """
     synth_lats = site_data_synth['lat']
     synth_longs = site_data_synth['long']
     samples = np.zeros((len(new_data_dhw['Lat']), 2))
@@ -60,3 +75,34 @@ def find_NN_dhw_data(site_data_synth,new_data_dhw,nyears):
         selected_dhws[nn, :] = new_data_dhw['Dhw'][nearest_sites[nn]]
 
     return selected_dhws
+
+def find_NN_conn_data(site_data_synth,conn_samples,conn_orig):
+    """
+    Find closest neighbours in synthetic connectivity data to synthetic site_data.
+
+    :param dataframe site_data_synth: synthetic site data.
+    :param dataframe conn_samples: synthetic connectivity data.
+    :param dataframe conn_orig: original connectivity data.
+    """
+    synth_lats = site_data_synth['lat']
+    synth_longs = site_data_synth['long']
+    samples = np.zeros((len(conn_samples.lats), 2))
+    site_data_vals = np.zeros((len(synth_lats), 2))
+
+    for l in range(len(conn_samples.lats)):
+        samples[l][:] = [conn_samples.longs[l], conn_samples.lats[l]]
+
+    neigh = NearestNeighbors(n_neighbors=1)
+    neigh.fit(samples)
+
+    for k in range(len(synth_lats)):
+        site_data_vals[k][:] = [-synth_lats[k], synth_longs[k]]
+
+    nearest_sites = neigh.kneighbors(site_data_vals, return_distance=False)
+    nearest_site_inds = [nearest_sites[kk][0] for kk in range(len(nearest_sites))]
+    selected_conn_data = np.zeros(len(nearest_site_inds),len(nearest_site_inds))
+    conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
+    selected_conn_data = conn_samples_array[nearest_site_inds,:]
+
+    return selected_conn_data
+
