@@ -28,7 +28,7 @@ site_data_synth = pd.read_csv(
 )
 
 breakpoint()
-conn_data, conn_orig, scaler, metadata_conn =  preprocess_functions.reprocess_conn_data(site_data,conn_orig)
+conn_data, conn_orig, scaler, metadata_conn =  preprocess_functions.preprocess_conn_data(site_data,conn_orig)
 
 ### ---------------------------------------Train GAN model-------------------------------------------------------###
 # define the training parameters for the GAN network
@@ -53,13 +53,9 @@ train_args = ["", epochs, log_step]
 
 # run training to learn from data
 model = GAN_model.GAN
-breakpoint()
 # Training the GAN model
 synthesizer = model(gan_args)
-breakpoint()
 synthesizer.train(conn_data, train_args)
-
-breakpoint()
 # synthesizer.save('generator_connectivity_data_Moore')
 
 # look at generator and discriminator summary
@@ -80,16 +76,13 @@ real = synthesizer.get_data_batch(train=conn_data, batch_size=test_size, seed=se
 real_samples = pd.DataFrame(real, columns=data_cols)
 conn_samples = pd.DataFrame(scaler.inverse_transform(real_samples[data_cols[1:]]), columns=data_cols[1:])
 conn_data_full = pd.DataFrame(scaler.inverse_transform(conn_data[data_cols[1:]]), columns=data_cols[1:])
-# ax = plt.imshow(conn_orig[conn_orig.keys()[1:20]][0:19] ,interpolation = 'nearest')
-# plt.show()
-# ax = plt.imshow(conn_samples[conn_samples.keys()[1:20]][0:19] ,interpolation = 'nearest')
-# plt.show()
+
 ### ------------------------------------Test synthetic data utility--------------------------------------------###
 report = QualityReport()
-report.generate(conn_orig, conn_samples[:,conn_orig.columns], metadata_conn)
+report.generate(conn_orig, conn_samples[conn_orig.columns], metadata_conn)
 report.get_details(property_name='Column Shapes')
 report.get_details(property_name='Pair Trends')
-#evaluate(conn_samples, conn_data_full, metrics=["KSTest"])
+#evaluate(conn_samples, conn_data_full)
 #LogisticDetection.compute(conn_data_full, conn_samples)
 breakpoint()
 #table_evaluator = TableEvaluator(conn_data_full[conn_data_full.keys()[1:200]],conn_samples[conn_samples.keys()[1:200]],)
