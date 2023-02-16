@@ -3,6 +3,15 @@ import numpy as np
 import plotly.graph_objects as go
 
 def plot_comparison_scatter(sample_sites,new_site_data,site_data,colour,size):
+    """
+    Plot scatter plot to compare synthetic and original data.
+
+    :param dataframe sample_sites: conditionally sampled site data.
+    :param dataframe new_site_data: synthetic site data.
+    :param data_frame site_data: original site data.
+    :param str color: site data variable to be represented by color (must be float).
+    :param str size: site data variable to be represented by size (must be float).
+    """
     fig, axes = plt.subplots(1, 3)
     axes[0].scatter(new_site_data['lat'], new_site_data['long'],
                             s=new_site_data[size], c=new_site_data[colour])
@@ -20,6 +29,14 @@ def plot_comparison_scatter(sample_sites,new_site_data,site_data,colour,size):
     return fig, axes
 
 def plot_comparison_hist(sample_sites,new_site_data,site_data,parameter):
+    """
+    Plot histograms to compare synthetic and original data.
+
+    :param dataframe sample_sites: conditionally sampled site data.
+    :param dataframe new_site_data: synthetic site data.
+    :param data_frame site_data: original site data.
+    :param str parameter: site data variable to be represented as histogram.
+    """
     fig2, axes = plt.subplots(1, 3)
     axes[0].hist(new_site_data[parameter], bins=round(np.sqrt(new_site_data.shape[0])))
     axes[1].hist(site_data[parameter], bins=round(np.sqrt(site_data.shape[0])))
@@ -33,6 +50,15 @@ def plot_comparison_hist(sample_sites,new_site_data,site_data,parameter):
     fig2.show()
 
 def get_data_quantiles(dhw_df,new_data_dhw,nyears,old_years,new_years):
+    """
+    Plot dhw data as time series of quantiles.
+
+    :param dataframe dhw_df: contains original dhw data.
+    :param dataframe new_data_dhw: synthetic dhw data.
+    :param int nyears: number of years to display.
+    :param vec old_years: vector of years in original dhw dataset.
+    :param vec new_years: vector of years in synthetic dhw dataset.
+    """
     outcomes_data = {'upper_25': [0.0]*nyears,
                     'lower_25': [0.0]*nyears,
                     'upper_50': [0.0]*nyears,
