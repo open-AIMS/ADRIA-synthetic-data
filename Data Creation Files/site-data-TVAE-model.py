@@ -22,7 +22,7 @@ plot_figs = 0
 
 ### -----------------------------------Preprocess data for sdv.TVAE model fit-------------------------------------###
 # simplify to dataframe
-site_data, metadata = preprocess_functions.preprocess_site_data(site_data_geo)
+site_data, metadata_site = preprocess_functions.preprocess_site_data(site_data_geo)
 
 breakpoint()
 ### -----------------------------------Fit and save TVAE model for site data-------------------------------------###
@@ -43,23 +43,7 @@ new_data_site_data = model.sample(num_rows=N)
 evaluate(new_data_site_data, site_data)
 # Ml ability to detec difference between (1 minus ROC AUC score for ML classifier)
 LogisticDetection.compute(site_data, new_data_site_data)
-breakpoint()
-metadata_site = {'fields': {'site_id': {'type': 'id'},
-                            'habitat': {'type': 'categorical'},
-                            'k': {'type': 'numerical', 'subtype': 'float'},
-                            'area': {'type': 'numerical', 'subtype': 'float'},
-                            'rubble': {'type': 'numerical', 'subtype': 'float'},
-                            'sand': {'type': 'numerical', 'subtype': 'float'},
-                            'rock': {'type': 'numerical', 'subtype': 'float'},
-                            'coral_algae': {'type': 'numerical', 'subtype': 'float'},
-                            'na_proportion': {'type': 'numerical', 'subtype': 'float'},
-                            'depth_mean': {'type': 'numerical', 'subtype': 'float'},
-                            'depth_sd': {'type': 'numerical', 'subtype': 'float'},
-                            'depth_med': {'type': 'numerical', 'subtype': 'float'},
-                            'zone_type': {'type': 'categorical'},
-                             'long': {'type': 'numerical', 'subtype': 'float'},
-                              'lat': {'type': 'numerical', 'subtype': 'float'}},
-                'primary_key':'site_id'}
+
 breakpoint()
 report = QualityReport()
 report.generate(site_data, new_data_site_data, metadata_site)
