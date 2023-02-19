@@ -66,7 +66,21 @@ fig_data.show()
 fig_synth = create_timeseries(outcomes_synth, label="Synthetic DHW Data")
 fig_synth = go.Figure(fig_synth)
 fig_synth.show()
+breakpoint()
+### -------------------------Sample synthetic dhws at synthetic site data locations -----------------------------###
+Lat =-1.*site_data_synth.lat.values
+Long = site_data_synth.long.values
+data = {'Lat':Lat,'Long':Long}
+context = pd.DataFrame(data)
+selected_dhw_data = model.sample(context=context)
+selected_years = [str(yr+2025) for yr in range(nyears)]
+selected_years = selected_years*len(site_data_synth.lat.values)
+selected_dhw_data.insert(4,"Year",selected_years,True)
 
-### --------------------------Find nearest negihbours to synthetic site data------------------------------------###
-selected_dhws = find_NN_dhw_data(site_data_synth,new_data_dhw,nyears)
+outcomes_data,outcomes_synth_selected = get_data_quantiles(dhw_45_df,selected_dhw_data,nyears,old_years,selected_years)
+
+fig_synth = create_timeseries(outcomes_synth_selected, label="Synthetic sampled DHW Data")
+fig_synth = go.Figure(fig_synth)
+fig_synth.show()
+#selected_dhws = find_NN_dhw_data(site_data_synth,new_data_dhw,nyears)
 
