@@ -49,7 +49,7 @@ model = GAN_model.GAN
 # Training the GAN model
 synthesizer = model(gan_args)
 synthesizer.train(conn_data, train_args)
-# synthesizer.save('generator_connectivity_data_Moore')
+# synthesizer.save('generator_connectivity')
 
 # look at generator and discriminator summary
 synthesizer.generator.summary()
@@ -78,9 +78,11 @@ report.get_details(property_name='Pair Trends')
 #evaluate(conn_samples, conn_data_full)
 #LogisticDetection.compute(conn_data_full, conn_samples)
 breakpoint()
-#table_evaluator = TableEvaluator(conn_data_full[conn_data_full.keys()[1:200]],conn_samples[conn_samples.keys()[1:200]],)
-#table_evaluator.visual_evaluation()
 ### -------------------------------Select conn data closest to site data spatially-------------------------------###
 
 selected_conn_data = find_NN_conn_data(site_data_synth,conn_samples,conn_orig)
+selected_conn_data = anonymize_conn(site_data_synth,selected_conn_data)
+synth_conn_fn = "Synthetic Data\\Synthetic Data Packages\\"+synth_data_fn.split("\\")[1][9:-3]
++"connectivity\\2000\\conn_data"+synth_data_fn.split("\\")[1][9:-3]+"csv"
 
+selected_conn_data.to_csv(synth_conn_fn)
