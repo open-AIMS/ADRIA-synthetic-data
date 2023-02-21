@@ -68,14 +68,14 @@ def get_data_quantiles(dhw_df,new_data_dhw,nyears,old_years,new_years):
                     'upper_95': [0.0]*nyears,
                     'lower_95': [0.0]*nyears,
                     'median': [0.0]*nyears, }
+
     keys = [k for k in outcomes_data.keys()]
     outcomes_synth = outcomes_data
     quantiles = [97.5, 25, 87.5, 12.5, 75, 25, 62.5, 37.5]
 
-
     for y in range(nyears):
 
-        data_temp = dhw_df['Dhw'][old_years == y+2025]
+        data_temp = dhw_df['Dhw'][old_years == str(y+2025)]
         synth_data_temp = new_data_dhw['Dhw'][np.transpose(new_years) == str(y+2025)]
         data_percentile_temp = np.percentile(data_temp, quantiles)
         synth_data_percentile_temp = np.percentile(synth_data_temp, quantiles)
