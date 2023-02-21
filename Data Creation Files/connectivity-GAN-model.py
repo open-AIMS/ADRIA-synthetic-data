@@ -11,25 +11,18 @@ from sdmetrics.reports.single_table import QualityReport
 
 import preprocess_functions
 import GAN_model
-from sample_sites_functions import find_NN_conn_data
+from postprocess_functions import find_NN_conn_data, anonymize_conn
 ### -----------------------------Load site data and connectivity data to synethesize----------------------------###
-data_set_folder = "Original Data"
-synth_data_set_folder = "Synthetic Data"
-conn_orig = pd.read_csv(
-    data_set_folder
-    + "\\Moore_2022-11-17\\connectivity\\2015\\connect_matrix_2015_3.csv",
-    skiprows=3,
-)
-site_data = pd.read_csv(
-    data_set_folder + "\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.csv"
-)
-site_data_synth = pd.read_csv(
-    synth_data_set_folder + "\\site_data_" + data_set_folder + "_numsamps_29.csv"
-)
+original_conn_fn = "Original Data\\Moore_2022-11-17\\connectivity\\2015\\connect_matrix_2015_3.csv"
+orginal_site_data_fn= "Original Data\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.csv"
+synth_data_fn = "Synthetic Data\\site_data_Original Data_numsamps_29.csv"
 
-breakpoint()
+conn_orig = pd.read_csv(original_conn_fn,skiprows=3)
+site_data = pd.read_csv(orginal_site_data_fn)
+site_data_synth = pd.read_csv(synth_data_fn)
+
 conn_data, conn_orig, scaler, metadata_conn =  preprocess_functions.preprocess_conn_data(site_data,conn_orig)
-
+breakpoint()
 ### ---------------------------------------Train GAN model-------------------------------------------------------###
 # define the training parameters for the GAN network
 data_cols = conn_data.columns
