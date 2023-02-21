@@ -9,13 +9,13 @@ from sdv.tabular import TVAE
 
 import preprocess_functions
 from data_comparison_plots import plot_comparison_scatter, plot_comparison_hist
-from sample_sites_functions import sample_rand_radii
+from postprocess_functions import sample_rand_radii, anonymize_spatial, generate_timestamp
+
+from package_synth_data import initialize_data_package
 breakpoint()
 
 ### ---------------------------------------Load site data to synethesize-----------------------------------------###
-data_set_folder = "Original Data"
-site_data_geo = gp.read_file(
-    data_set_folder+"\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.gpkg")
+site_data_geo = gp.read_file("Original Data\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.gpkg")
 
 # indicate whether to plot descriptive figs or not
 plot_figs = 0
@@ -75,5 +75,11 @@ if plot_figs == 1:
     fig7, axes = plot_comparison_hist(sample_sites,new_data_site_data,site_data,'rubble')
 
 ### ------------------------------------------Save site data to csv-------------------------------------------###
-sample_sites.to_csv('site_data_'+data_set_folder +
-                    '_numsamps_'+str(N3)+'.csv')
+time_stamp = generate_timestamp()
+sample_sites.to_csv('Synthetic Data\\site_data_'+time_stamp+'_numsamps_'+str(N3)+'.csv')
+sample_sites_anon = anonymize_spatial(sample_sites)
+
+initialize_data_package(time_stamp+'_numsamps_'+str(N3))
+
+sample_sites_anon.to_csv('Synthetic Data\\Site Data Packages\\'+time_stamp+'_numsamps_'+
+                        str(N3)+'\\site_data\\site_data_anon_'+time_stamp+'_numsamps_'+str(N3)+'.csv')
