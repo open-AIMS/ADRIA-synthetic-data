@@ -81,5 +81,4 @@ sample_sites_anon = anonymize_spatial(sample_sites)
 
 initialize_data_package(time_stamp+'_numsamps_'+str(N3))
 
-sample_sites_anon.to_csv('Synthetic Data\\Site Data Packages\\'+time_stamp+'_numsamps_'+
-                        str(N3)+'\\site_data\\site_data_anon_'+time_stamp+'_numsamps_'+str(N3)+'.csv')
+sample_sites_anon.to_csv('Synthetic Data\\Synthetic Data Packages\\'+time_stamp+'_numsamps_'+str(N3)+'\\site_data\\site_data_anon_'+time_stamp+'_numsamps_'+str(N3)+'.csv')
