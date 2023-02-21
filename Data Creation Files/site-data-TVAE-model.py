@@ -32,7 +32,7 @@ N2 = len(site_data['site_id'])
 model = TVAE(primary_key='site_id')
 model.fit(site_data)
 
-model.save('site_data_synth_model.pkl')
+#model.save('site_data_synth_model.pkl')
 # model = TVAE.load('site_data_synth_model.pkl')
 
 ### ----------------------------------------Sample data and test utility-----------------------------------------###
