@@ -148,51 +148,53 @@ def anonymize_conn(site_data_synth,conn_data_synth):
     conn_data_synth_df = pd.DataFrame(conn_data_md)
     return conn_data_synth_df
 
-def sample_dhw_ensemble(model,context,nsamples,nsites,nyears):
+def sample_env_ensemble(model,context,nsamples,nsites,nyears,layer):
     """
-    Sample synthetic dhw data using conditional model to create nsamples*nsites*ntimesteps array,
+    Sample synthetic environmental data using conditional model to create nsamples*nsites*ntimesteps array,
     which can be saved as a netCDF file.
 
-    :param SDV model model: Synthetic data model for dhw.
-    :param dict context: Lats and longs, synthesized for synthetic site data, to conditionalise the dhw model on.
+    :param SDV model model: Synthetic data model for dhw or wave data.
+    :param dict context: Lats and longs, synthesized for synthetic site data, to conditionalise the model on.
     :param int nsamples: number of samples to take.
     :param int nsites: number of sites in the model.
     :param nyears: number of years simulated by model.
+    :param str: indicates the data layer ('dhw' or 'wave')
 
     """
-    store_dhws = np.zeros(nsamples,nsites,nyears)
+    store_env = np.zeros(nsamples,nsites,nyears)
     for ss in range(nsamples):
         sample_temp = model.sample(context=context)
         for si in range(nsites):
-            store_dhws[ss,si,:] = sample_temp['Dhw'][sample_temp['Site']==si]
+            store_env[ss,si,:] = sample_temp[layer][sample_temp['site']==si]
 
-    return store_dhws
+    return store_env
 
-def create_dhw_nc(store_dhws,lats,longs,site_ids,fn):
+def create_env_nc(store_env,lats,longs,site_ids,layer,fn):
     """
-    Save dhw data as a net cdf file for site data packaging.
+    Save environmental data as a net cdf file for site data packaging.
 
-    :param numpy array store_dhws: Synthetic data model for dhw.
-    :param dict context: Lats and longs, synthesized for synthetic site data, to conditionalise the dhw model on.
-    :param int nsamples: number of samples to take.
-    :param int nsites: number of sites in the model.
-    :param nyears: number of years simulated by model.
+    :param numpy array store_env: Synthetic data model for dhw or wave data.
+    :param numpy array lats: lats for synthesized env data layer.    
+    :param numpy array longs: longs for synthesized env data layer. 
+    :param numpy array site_ids: anonymized site_ids for synthesized env data layer.
+    :param str layer: indicates type of env data ('dhw' or 'wave').
+    :param fn: filename for nc data set to be saved as.
 
     """
     ds = nc.Dataset(fn, 'w', format='NETCDF4')
     ds.createDimension('sites', len(site_ids))
-    ds.createDimension('member',store_dhws.shape[0])
-    ds.createDimension('timesteps', store_dhws.shape[2])
+    ds.createDimension('member',store_env.shape[0])
+    ds.createDimension('timesteps', store_env.shape[2])
 
     longitude = ds.createVariable('longitude', 'f4', ('sites',))
     latitude = ds.createVariable('latitude', 'f4', ('sites',))
     reef_siteid = ds.createVariable('reef_siteid', 'f4', ('sites',))
     UNIQUE_ID = ds.createVariable('UNIQUE_ID', 'f4', ('sites',))
-    dhw = ds.createVariable('dhw', 'f4', ('member', 'sites', 'timesteps',))
+    dhw = ds.createVariable(layer, 'f4', ('member', 'sites', 'timesteps',))
 
     longitude[:] = lats
     latitude[:] = longs
     reef_siteid[:] = site_ids
     UNIQUE_ID[:] = site_ids
-    dhw[:,:,:] = store_dhws
+    dhw[:,:,:] = store_env
     ds.close()
