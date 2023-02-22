@@ -49,15 +49,17 @@ def plot_comparison_hist(sample_sites,new_site_data,site_data,parameter):
     axes[2].set(xlabel=parameter, ylabel='counts')
     fig2.show()
 
-def get_data_quantiles(dhw_df,new_data_dhw,nyears,old_years,new_years):
+def get_data_quantiles(env_df,new_data_env,nyears,old_years,new_years,layer):
     """
-    Plot dhw data as time series of quantiles.
+    Plot environmental data as time series of quantiles.
 
-    :param dataframe dhw_df: contains original dhw data.
-    :param dataframe new_data_dhw: synthetic dhw data.
+    :param dataframe env_df: contains original env data.
+    :param dataframe new_data_env: synthetic env data.
     :param int nyears: number of years to display.
-    :param vec old_years: vector of years in original dhw dataset.
-    :param vec new_years: vector of years in synthetic dhw dataset.
+    :param vec old_years: vector of years in original env dataset.
+    :param vec new_years: vector of years in synthetic env dataset.
+    :param str layer: environmental data layer type ('dhw' or 'wave').
+
     """
     outcomes_data = {'upper_25': [0.0]*nyears,
                     'lower_25': [0.0]*nyears,
@@ -75,8 +77,8 @@ def get_data_quantiles(dhw_df,new_data_dhw,nyears,old_years,new_years):
 
     for y in range(nyears):
 
-        data_temp = dhw_df['Dhw'][old_years == str(y+2025)]
-        synth_data_temp = new_data_dhw['Dhw'][np.transpose(new_years) == str(y+2025)]
+        data_temp = env_df[layer][old_years == str(y+2025)]
+        synth_data_temp = new_data_env[layer][np.transpose(new_years) == str(y+2025)]
         data_percentile_temp = np.percentile(data_temp, quantiles)
         synth_data_percentile_temp = np.percentile(synth_data_temp, quantiles)
 
