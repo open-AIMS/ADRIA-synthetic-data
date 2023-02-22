@@ -4,24 +4,26 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from table_evaluator import load_data, TableEvaluator
+#from table_evaluator import load_data, TableEvaluator
 from sdmetrics.reports.single_table import QualityReport
 #from sdv.evaluation import evaluate
 #from sdv.metrics.tabular import LogisticDetection
 
-import preprocess_functions
+from preprocess_functions import preprocess_conn_data
 import GAN_model
 from postprocess_functions import find_NN_conn_data, anonymize_conn
+
+
 ### -----------------------------Load site data and connectivity data to synethesize----------------------------###
 original_conn_fn = "Original Data\\Moore_2022-11-17\\connectivity\\2015\\connect_matrix_2015_3.csv"
-orginal_site_data_fn= "Original Data\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.csv"
-synth_data_fn = "Synthetic Data\\site_data_Original Data_numsamps_29.csv"
+orginal_site_data_fn = "Original Data\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.csv"
+synth_data_fn = "Synthetic Data\\site_data_22-2-2023_92546_numsamps_30.csv"
 
 conn_orig = pd.read_csv(original_conn_fn,skiprows=3)
 site_data = pd.read_csv(orginal_site_data_fn)
 site_data_synth = pd.read_csv(synth_data_fn)
 
-conn_data, conn_orig, scaler, metadata_conn =  preprocess_functions.preprocess_conn_data(site_data,conn_orig)
+conn_data, conn_orig, scaler, metadata_conn =  preprocess_conn_data(site_data,conn_orig)
 breakpoint()
 ### ---------------------------------------Train GAN model-------------------------------------------------------###
 # define the training parameters for the GAN network
