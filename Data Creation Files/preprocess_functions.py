@@ -42,52 +42,100 @@ def preprocess_site_data(site_data_geo):
                 'primary_key':'site_id'}
     return site_data, metadata
 
-def preprocess_dhw_data(dhw_data):
+def convert_to_csv(site_data_geo, csv_fn):
     """
-    Preprocesses dhw into correct form for PAR model.
+    Convert geo site data to csv for use with the connectivity model (environment incompatible with geopandas).
 
-    :param numpy array dhw_data: contains original dhw data, loaded from nc file.
+    :param dataframe site_data_geo: contains site data with :geometry column.
+    :param str csv_fn: file name for new site data csv.
 
     """
-    nyears, nsites, nreps = dhw_data['dhw'].shape
+    site_data = site_data_geo[site_data_geo.columns[:-1]]
+    site_data['long'] = site_data_geo.centroid.x
+    site_data['lat'] = site_data_geo.centroid.y
+    site_data.to_csv(csv_fn[:-4]+"csv")
+
+def preprocess_env_data(env_data, layer):
+    """
+    Preprocesses environmental data layers into correct form for PAR model.
+
+    :param numpy array env_data: contains original dhw or wave data, loaded from nc file.
+    :param str layer: string indicating whether the layer is 'dhw' data or 'wave' data.
+
+    """
+    nyears, nsites, nreps = env_data[layer].shape
     size = nyears*nsites
 
-    lats = dhw_data['latitude'][:]
-    longs = dhw_data['longitude'][:]
-    dhw_df = pd.DataFrame({"Year": [0]*size, "Lat": [0.0]*size,
-                            "Long": [0.0]*size, "Site": [0]*size, "Dhw": [0.0]*size})
+    lats = env_data['latitude'][:]
+    longs = env_data['longitude'][:]
+    env_df = pd.DataFrame({"year": [0]*size, "lat": [0.0]*size,
+                            "long": [0.0]*size, "site": [0]*size, layer: [0.0]*size})
 
     count = 0
 
     for yr in range(nyears):
         for si in range(nsites):
-            dhw_df['Year'][count] = str(yr+2025)
-            dhw_df['Lat'][count] = lats[si]
-            dhw_df['Long'][count] = longs[si]
-            dhw_df['Site'][count] = si+1
-            dhw_df['Dhw'][count] = dhw_data['dhw'][yr,si, np.random.randint(nreps-1)]
+            env_df['year'][count] = str(yr+2025)
+            env_df['lat'][count] = lats[si]
+            env_df['long'][count] = longs[si]
+            env_df['site'][count] = si+1
+            env_df[layer][count] = env_data[layer][yr,si, np.random.randint(nreps-1)]
             count += 1
 
     data_types = {
-        'Long': 'continuous',
-        'Lat': 'continuous',
-        'Site': 'categorical',
-        'Dhw': 'continuous'
+        'long': 'continuous',
+        'lat': 'continuous',
+        'site': 'categorical',
+        layer: 'continuous'
     }
 
     # create metadata dictionary
-    metadata_dhw = {'fields': {'Year': {'type': 'datetime'},
-                           'Lat': {'type': 'numerical', 'subtype': 'float'},
-                           'Long': {'type': 'numerical', 'subtype': 'float'},
-                           'Site': {'type': 'categorical'},
-                           'Dhw': {'type': 'numerical', 'subtype': 'float'}},
-                'context_columns': ['Site'],
-                'entity_columns': ['Lat', 'Long'],
-                'sequence_index': 'Year'}
+    metadata_env = {'fields': {'year': {'type': 'datetime'},
+                           'lat': {'type': 'numerical', 'subtype': 'float'},
+                           'long': {'type': 'numerical', 'subtype': 'float'},
+                           'site': {'type': 'categorical'},
+                           layer: {'type': 'numerical', 'subtype': 'float'}},
+                'context_columns': ['site'],
+                'entity_columns': ['lat', 'long'],
+                'sequence_index': 'year'}
 
-    old_years = dhw_df["Year"]
-    dhw_df["Year"] = pd.to_datetime(dhw_df["Year"], format='%Y')
-    return dhw_df, data_types, metadata_dhw, old_years, nyears
+    old_years = env_df["year"]
+    env_df["year"] = pd.to_datetime(env_df["year"], format='%Y')
+    return env_df, data_types, metadata_env, old_years, nyears
+
+def preprocess_cover_data(cc_data,site_data):
+    """
+    Preprocesses coral cover into correct form for tabular model.
+
+    :param numpy array cc_data: contains original dhw or wave data, loaded from nc file.
+
+    """
+    nsites, nspecies = cc_data['covers'].shape
+    size = nspecies*nsites
+
+    cc_df = pd.DataFrame({"site_id": [0]*size, "species": [0]*size,"lat": [0.0]*size,"long": [0.0]*size,
+                            "cover": [0.0]*size})
+
+    count = 0
+
+    for si in range(nsites):
+        for sp in range(nspecies):
+            cc_df['site_id'][count] = si+1
+            cc_df['lat'][count] = site_data['lat'][si]
+            cc_df['long'][count] = site_data['long'][si]
+            cc_df['species'][count] = sp+1
+            cc_df['cover'][count] = cc_data['covers'][si,sp]
+            count += 1
+
+    # create metadata dictionary
+    metadata_cc = {'fields': {'site_id': {'type': 'id'},
+                           'species': {'type': 'categorical'},
+                           'lat': {'type': 'numerical', 'subtype': 'float'},
+                           'long': {'type': 'numerical', 'subtype': 'float'},
+                           'cover': {'type': 'numerical', 'subtype': 'float'}},
+                    'primary_key':'site_id'}
+
+    return cc_df, metadata_cc
 
 
 def tide_dist(latlong_site1, latlong_site2):
