@@ -69,3 +69,27 @@ def create_env_nc(store_env,lats,longs,site_ids,layer,fn):
     UNIQUE_ID[:] = site_ids
     dhw[:,:,:] = store_env
     ds.close()
+
+def create_cover_nc(store_cover,n_sites,n_species,fn):
+    """
+    Save environmental data as a net cdf file for site data packaging.
+
+    :param numpy array store_env: Synthetic data model for dhw or wave data.
+    :param numpy array lats: lats for synthesized env data layer.    
+    :param numpy array longs: longs for synthesized env data layer. 
+    :param numpy array site_ids: anonymized site_ids for synthesized env data layer.
+    :param str layer: indicates type of env data ('dhw' or 'wave').
+    :param fn: filename for nc data set to be saved as.
+
+    """
+    ds = nc.Dataset(fn, 'w', format='NETCDF4')
+    ds.createDimension('reef_siteid', n_sites)
+    ds.createDimension('species',n_species)
+
+    covers = ds.createVariable('covers', 'f4', ('reef_siteid','species'))
+    reef_siteid = ds.createVariable('reef_siteid', 'f4', ('reef_siteid',))
+
+    covers[:,:] = store_cover
+    reef_siteid[:] = [ii for ii in range(1,n_sites+1)]
+
+    ds.close()
