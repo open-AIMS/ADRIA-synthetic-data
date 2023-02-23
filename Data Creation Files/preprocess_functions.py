@@ -10,9 +10,8 @@ def preprocess_site_data(site_data_geo):
 
     """
     site_data = site_data_geo[site_data_geo.columns[:-1]]
-    site_data["long"] = site_data_geo.centroid.x
-    site_data["lat"] = site_data_geo.centroid.y
-
+    site_data['long'] = site_data_geo.centroid.x
+    site_data['lat'] = site_data_geo.centroid.y
     # get rid of identifying ids
     site_data = site_data.drop('reef_siteid', axis=1)
     site_ids = pd.DataFrame(
