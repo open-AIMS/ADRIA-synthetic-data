@@ -5,35 +5,39 @@ from sdv.evaluation import evaluate
 from sdv.metrics.tabular import LogisticDetection
 from sdmetrics.reports.single_table import QualityReport
 
-from sdv.tabular import TVAE
+from sdv.lite import TabularPreset
 
-import preprocess_functions
+from preprocess_functions import preprocess_site_data, convert_to_csv
 from data_comparison_plots import plot_comparison_scatter, plot_comparison_hist
-from postprocess_functions import sample_rand_radii, anonymize_spatial, generate_timestamp
+from sampling_functions import sample_rand_radii
+from postprocess_functions import anonymize_spatial, generate_timestamp
+from package_synth_data import initialize_data_package,retrieve_orig_site_data_fp
 
-from package_synth_data import initialize_data_package
-breakpoint()
+### ---------------------------------------Key Inputs-----------------------------------------###
+orig_data_package = "Moore_2022-11-17"
 
 ### ---------------------------------------Load site data to synethesize-----------------------------------------###
-site_data_geo = gp.read_file("Original Data\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.gpkg")
+
+site_data_geo_fn = retrieve_orig_site_data_fp(orig_data_package)
+site_data_geo = gp.read_file(site_data_geo_fn)
+
+# convert to csv for use with connectivity model (package clash with GAN model packages)
+convert_to_csv(site_data_geo,site_data_geo_fn)
 
 # indicate whether to plot descriptive figs or not
 plot_figs = 0
 
 ### -----------------------------------Preprocess data for sdv.TVAE model fit-------------------------------------###
 # simplify to dataframe
-site_data, metadata_site = preprocess_functions.preprocess_site_data(site_data_geo)
+site_data, metadata_site = preprocess_site_data(site_data_geo)
 
 breakpoint()
 ### -----------------------------------Fit and save TVAE model for site data-------------------------------------###
 N = 300
 N2 = len(site_data['site_id'])
 # set up TVAE, fit and save
-model = TVAE(primary_key='site_id')
+model = TabularPreset(name='FAST_ML', metadata=metadata_site)
 model.fit(site_data)
-
-#model.save('site_data_synth_model.pkl')
-# model = TVAE.load('site_data_synth_model.pkl')
 
 ### ----------------------------------------Sample data and test utility-----------------------------------------###
 # create sample data
@@ -76,6 +80,7 @@ if plot_figs == 1:
 
 ### ------------------------------------------Save site data to csv-------------------------------------------###
 time_stamp = generate_timestamp()
+sample_sites['lat'] = -1*sample_sites['lat']
 sample_sites.to_csv('Synthetic Data\\site_data_'+time_stamp+'_numsamps_'+str(N3)+'.csv')
 sample_sites_anon = anonymize_spatial(sample_sites)
 
