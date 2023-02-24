@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import netCDF4 as nc
 
 from sklearn.preprocessing import MinMaxScaler
@@ -70,20 +71,34 @@ def create_env_nc(store_env,lats,longs,site_ids,layer,fn):
     dhw[:,:,:] = store_env
     ds.close()
 
-def create_cover_nc(store_cover,n_sites,n_species,fn):
+def make_cover_array(cover_df):
     """
-    Save environmental data as a net cdf file for site data packaging.
+    Create array from synthetically generated coral cover dataframe to be packages as netcdf.
 
-    :param numpy array store_env: Synthetic data model for dhw or wave data.
-    :param numpy array lats: lats for synthesized env data layer.    
-    :param numpy array longs: longs for synthesized env data layer. 
-    :param numpy array site_ids: anonymized site_ids for synthesized env data layer.
-    :param str layer: indicates type of env data ('dhw' or 'wave').
+    :param dataframe cover_df: Synthetic coral cover dataframe.
+
+    """
+
+    sites = cover_df['lat'].unique()
+    species = cover_df['species'].unique()
+    store_cover = np.zeros((len(sites),len(species)))
+    for si in range(len(sites)):
+        store_cover[si,:] = cover_df['cover'][cover_df['lat']==sites[si]]
+
+    return store_cover
+
+def create_cover_nc(store_cover,fn):
+    """
+    Save cover data as a net cdf file for site data packaging.
+
+    :param numpy array store_cover: Synthetic data array containing cover data (dims = (n_sites,n_species)).
     :param fn: filename for nc data set to be saved as.
 
     """
+    n_sites = store_cover.shape[0]
+    n_species = store_cover.shape[1]
     ds = nc.Dataset(fn, 'w', format='NETCDF4')
-    ds.createDimension('reef_siteid', n_sites)
+    ds.createDimension('reef_siteid',n_sites)
     ds.createDimension('species',n_species)
 
     covers = ds.createVariable('covers', 'f4', ('reef_siteid','species'))
