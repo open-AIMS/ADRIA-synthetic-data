@@ -4,20 +4,25 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-#from table_evaluator import load_data, TableEvaluator
 from sdmetrics.reports.single_table import QualityReport
-#from sdv.evaluation import evaluate
-#from sdv.metrics.tabular import LogisticDetection
 
 from preprocess_functions import preprocess_conn_data
 import GAN_model
-from postprocess_functions import find_NN_conn_data, anonymize_conn
+from postprocess_functions import anonymize_conn
+from sampling_functions import find_NN_conn_data
+from package_synth_data import retrieve_synth_site_data_fp, retrieve_orig_site_data_fp, retrieve_orig_conn_fp
 
+
+### ------------------------------------------------Key Inputs---------------------------------------------------###
+root_original_file = 'Moore_2022-11-17'
+root_site_data_synth = 'site_data_23-2-2023_10551_numsamps_30.csv'
+year = "2015" # connectivity data year to use
+num = "3" # connectivity data sample number to use
 
 ### -----------------------------Load site data and connectivity data to synethesize----------------------------###
-original_conn_fn = "Original Data\\Moore_2022-11-17\\connectivity\\2015\\connect_matrix_2015_3.csv"
-orginal_site_data_fn = "Original Data\\Moore_2022-11-17\\site_data\\Moore_2022-11-17.csv"
-synth_data_fn = "Synthetic Data\\site_data_22-2-2023_92546_numsamps_30.csv"
+original_conn_fn = retrieve_orig_conn_fp(root_original_file,year,num)
+orginal_site_data_fn = retrieve_orig_site_data_fp(root_original_file)
+synth_data_fn = retrieve_synth_site_data_fp(root_site_data_synth)
 
 conn_orig = pd.read_csv(original_conn_fn,skiprows=3)
 site_data = pd.read_csv(orginal_site_data_fn)
@@ -48,6 +53,7 @@ train_args = ["", epochs, log_step]
 
 # run training to learn from data
 model = GAN_model.GAN
+
 # Training the GAN model
 synthesizer = model(gan_args)
 synthesizer.train(conn_data, train_args)
