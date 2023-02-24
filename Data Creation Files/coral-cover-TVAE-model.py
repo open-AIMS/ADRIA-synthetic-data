@@ -6,38 +6,43 @@ from sdv.evaluation import evaluate
 from sdv.metrics.tabular import LogisticDetection
 from sdmetrics.reports.single_table import QualityReport
 
-from sdv.lite import TabularPreset
-from sdv.sampling import Condition
-from sdv.constraints import Unique, FixedCombinations
+from sdv.tabular import TVAE
 
 from preprocess_functions import preprocess_cover_data
-from data_comparison_plots import plot_comparison_scatter, plot_comparison_hist
+from package_synth_data import retrieve_synth_site_data_fp, retrieve_orig_site_data_fp, retrieve_orig_cover_fp
+from sampling_functions import create_cover_conditional_struct
+from postprocess_functions import make_cover_array, create_cover_nc
 
 ### ------------------------------------------------Key Inputs---------------------------------------------------###
 root_original_file = 'Moore_2022-11-17'
+root_site_data_synth = 'site_data_23-2-2023_10551_numsamps_30.csv'
 
 ###---------------------------------------Load site data to synethesize------------------------------------------###
 
-root_site_data_synth = 'site_data_22-2-2023_92546_numsamps_30.csv'
-original_cover_data_fn = 'Original Data\\'+root_original_file+'\\site_data\\coral_cover.nc'
-original_site_data_fn = 'Original Data\\'+root_original_file+'\\site_data\\'+root_original_file+".csv"
-synth_site_data_fn = "Synthetic Data\\"+root_site_data_synth
+original_cover_data_fn = retrieve_orig_cover_fp(root_original_file)
+original_site_data_fn = retrieve_orig_site_data_fp(root_original_file)
+synth_site_data_fn = retrieve_synth_site_data_fp(root_site_data_synth)
 
-breakpoint()
 cover_orig = netCDF4.Dataset(original_cover_data_fn, 'r')
 site_data_orig = pd.read_csv(original_site_data_fn)
 site_data_synth = pd.read_csv(synth_site_data_fn)
 
 ###----------------------------------Preprocess data for sdv.fastML model fit------------------------------------###
 # simplify to dataframe
-breakpoint()
 cover_df, metadata_cover = preprocess_cover_data(cover_orig,site_data_orig)
 
 ###----------------------------------Fit and save fastML model for site data-------------------------------------###
-model = TabularPreset(name='FAST_ML', metadata=metadata_cover)
+model = TVAE(primary_key='site_id')
+cover_df['lat'] = -1*cover_df['lat']
 model.fit(cover_df)
 synth_cover = model.sample(num_rows=300)
-breakpoint()
+
+# evaluate K-S score
+evaluate(cover_df,synth_cover)
+
 ###----------Sample conditional dist, based on synthetic lats and longs and requirement of species types---------###
-conditions = pd.DataFrame({"species": cover_df["species"]})
-model.sample_remaining_columns(conditions)
+conditions = create_cover_conditional_struct(site_data_synth,max(cover_df['species']))
+synth_sampled = model.sample_remaining_columns(conditions,max_tries_per_batch=300)
+breakpoint()
+array_synth_sampled = make_cover_array(synth_sampled)
+create_cover_nc(array_synth_sampled, root_site_data_synth)
