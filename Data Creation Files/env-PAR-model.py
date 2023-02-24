@@ -12,31 +12,23 @@ from sdmetrics.reports.single_table import QualityReport
 
 from preprocess_functions import preprocess_env_data
 from data_comparison_plots import create_timeseries, get_data_quantiles
-from postprocess_functions import sample_env_ensemble, create_env_nc
+from sampling_functions import sample_env_ensemble
+from postprocess_functions import create_env_nc
+from package_synth_data import retrieve_orig_env_fp, retrieve_synth_site_data_fp,retrieve_synth_env_data_fp
 
 ### ---------------------------------------------Key inputs ------------------------------------------------------###
 
 layer = 'Ub'
 rcp = '45'
 root_original_file = 'Moore_2022-11-17'
-root_site_data_synth = 'site_data_22-2-2023_92546_numsamps_30.csv'
+root_site_data_synth = 'site_data_23-2-2023_10551_numsamps_30.csv'
 
 ### ----------------------------------Load site data and env data to synethesize----------------------------------###
 
+original_data_fn = retrieve_orig_env_fp(root_original_file,rcp,layer)
+synth_data_fn = retrieve_synth_site_data_fp(root_site_data_synth)
 
-if layer=='dhw':
-    file_loc = "\\DHWs\\"
-    file = 'dhwRCP'+rcp+'.nc'
-elif layer=='Ub':
-    file_loc = "\\waves\\"
-    file = 'wave_RCP'+rcp+'.nc'
-else:
-    ValueError("Unrecognised environmental data layer.")
-
-original_data_fn = "Original Data\\"+root_original_file+file_loc+file
-synth_data_fn = "Synthetic Data\\"+root_site_data_synth
 ENV = netCDF4.Dataset(original_data_fn, 'r')
-
 site_data_synth = pd.read_csv(synth_data_fn)
 breakpoint()
 ### --------------------------------------Reshape data to fit PAR model------------------------------------------###
@@ -44,7 +36,6 @@ env_df, data_types, metadata_env, old_years, nyears = preprocess_env_data(ENV,la
 
 ### ----------------------------------------Set up and fit PAR model---------------------------------------------###
 model = PARModel(epochs=1024, cuda=False)
-
 model.fit(data=env_df,context_columns=['lat', 'long'],entity_columns=['site'],data_types=data_types,sequence_index='year')
 
 ### -----------------------------------------Sample data to synthesize--------------------------------------------###
@@ -85,6 +76,8 @@ long = site_data_synth.long.values
 data = {'lat':lat,'long':long}
 context = pd.DataFrame(data)
 selected_env_data = model.sample(context=context)
+
+### ------------------------------------------------Plot sampled data----------------------------------------------###
 selected_years = [str(yr+2025) for yr in range(nyears)]
 selected_years = selected_years*len(site_data_synth.lat.values)
 selected_env_data.insert(4,"year",selected_years,True)
@@ -95,9 +88,10 @@ fig_synth = create_timeseries(outcomes_synth_selected, label="Synthetic sampled 
 fig_synth = go.Figure(fig_synth)
 fig_synth.show()
 
+### -------------------------------------Save sample data in sitedata package-------------------------------------###
+
 selected_env_ensemble = sample_env_ensemble(model,context)
 
-synth_env_fn = "Synthetic Data\\Synthetic Data Packages\\"+synth_data_fn.split("\\")[1][9:-3]
-+file_loc+layer+"_"+synth_data_fn.split("\\")[1][9:-3]+"nc"
+synth_env_fn = retrieve_synth_env_data_fp(synth_data_fn,layer)
 
 create_env_nc(selected_env_ensemble,site_data_synth.lat.values,site_data_synth.long.values,site_data_synth.site_ids,synth_env_fn)
