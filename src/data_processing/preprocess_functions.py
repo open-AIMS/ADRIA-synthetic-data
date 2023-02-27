@@ -2,16 +2,13 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-def preprocess_site_data(site_data_geo):
+def preprocess_site_data(site_data):
     """
     Preprocess site data into correct format for TVAE model.
 
     :param dataframe site_data_geo: contains site data with :geometry column.
 
     """
-    site_data = site_data_geo[site_data_geo.columns[:-1]]
-    site_data['long'] = site_data_geo.centroid.x
-    site_data['lat'] = site_data_geo.centroid.y
     # get rid of identifying ids
     site_data = site_data.drop('reef_siteid', axis=1)
     site_ids = pd.DataFrame(

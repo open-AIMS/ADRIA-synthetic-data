@@ -127,5 +127,18 @@ def create_timeseries(outcomes, label="", color_code="rgba(255, 0, 0, "):
         go.Scatter(y=outcomes['median'], mode="lines", fillcolor=color_code + "1)",
                    name=str(label), line_color=color_code + "1)", legendgroup=label)
     ]
-
+    
+    go.Figure(fig_data)
     return fig_data
+
+def comparison_plots_site_data(sample_sites, new_site_data, site_data):
+    fig1, axes = plot_comparison_scatter(sample_sites,new_site_data,site_data,'area','k')
+
+    fig2, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'area')
+    fig3, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'k')
+    fig4, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'Reef')
+    fig5, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'habitat')
+    fig6, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'sitedepth')
+    fig7, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'rubble')
+
+    return [fig1,fig2,fig3,fig4,fig5,fig6,fig7]
