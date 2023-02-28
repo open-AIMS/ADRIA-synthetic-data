@@ -31,7 +31,7 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
 
     ###----------Sample conditional dist, based on synthetic lats and longs and requirement of species types---------###
     conditions = create_cover_conditional_struct(site_data_synth,max(cover_df['species']))
-    synth_sampled = model.sample_remaining_columns(conditions,max_tries_per_batch=300)
+    synth_sampled = model.sample_remaining_columns(conditions,max_tries_per_batch=500)
 
     array_synth_sampled = make_cover_array(synth_sampled)
     create_cover_nc(array_synth_sampled, root_site_data_synth)
