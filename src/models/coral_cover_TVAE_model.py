@@ -12,7 +12,7 @@ from src.data_processing.postprocess_functions import make_cover_array, create_c
 ###---------------------------------------Load site data to synethesize------------------------------------------###
 def coral_cover_model(root_original_file, root_site_data_synth, N):
     original_cover_data_fn = retrieve_orig_cover_fp(root_original_file)
-    original_site_data_fn = retrieve_orig_site_data_fp(root_original_file)
+    original_site_data_fn = retrieve_orig_site_data_fp(root_original_file,'.csv')
     synth_site_data_fn = retrieve_synth_site_data_fp(root_site_data_synth)
 
     cover_orig = netCDF4.Dataset(original_cover_data_fn, 'r')
