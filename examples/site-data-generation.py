@@ -4,10 +4,7 @@ from sdmetrics.reports.single_table import QualityReport
 
 import sys
 sys.path.append("..")
-sys.path.append("..//src")
-sys.path.append("..//original_data")
-sys.path.append("..//synthetic_data")
-breakpoint()
+
 from src.plotting.data_comparison_plots import comparison_plots_site_data
 from src.models.site_data_fastML_model import site_data_model
 
