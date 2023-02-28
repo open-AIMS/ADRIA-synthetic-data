@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 from src.models.coral_cover_TVAE_model import coral_cover_model
 
 from sdv.evaluation import evaluate
