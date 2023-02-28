@@ -5,7 +5,7 @@ from sdv.lite import TabularPreset
 from src.data_processing.preprocess_functions import preprocess_site_data
 from src.data_processing.sampling_functions import sample_rand_radii
 from src.data_processing.postprocess_functions import anonymize_spatial, generate_timestamp
-from src.data_processing.package_synth_data import initialize_data_package,retrieve_orig_site_data_fp, create_synth_site_fp,create_synth_site_data_package_fp
+from src.data_processing.package_synth_data import initialize_data_package,retrieve_orig_site_data_fp,create_synth_site_data_fp,create_synth_site_data_package_fp
 
 def site_data_model(orig_data_package, N, N2, N3):
     ### --------------------------------------Load site data to synethesize--------------------------------------###
@@ -34,7 +34,7 @@ def site_data_model(orig_data_package, N, N2, N3):
     time_stamp = generate_timestamp()
     sample_sites['lat'] = -1*sample_sites['lat']
     breakpoint()
-    sample_sites_fn = create_synth_site_fp(time_stamp,N2)
+    sample_sites_fn = create_synth_site_data_fp(time_stamp,N2)
     sample_sites.to_csv(sample_sites_fn)
     sample_sites_anon = anonymize_spatial(sample_sites)
 
