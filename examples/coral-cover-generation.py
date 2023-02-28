@@ -13,7 +13,7 @@ root_original_file = 'Moore_2022-11-17'
 root_site_data_synth = 'site_data_28-2-2023_164233_numsamps_30.csv'
 
 cover_df, synth_cover, synth_sampled, metadata_cover, root_site_data_synth = coral_cover_model(root_original_file, root_site_data_synth, 300)
-breakpoint()
+
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
 
 # evaluate K-S score
@@ -24,7 +24,6 @@ LogisticDetection.compute(cover_df, synth_cover)
 report = QualityReport()
 report.generate(cover_df, synth_cover, metadata_cover)
 report.get_details(property_name='Column Shapes')
-report.get_details(property_name='Pair Trends')
 
 # evaluate K-S score
 evaluate(synth_sampled, synth_cover)
