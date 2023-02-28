@@ -70,7 +70,7 @@ def connectivity_model(root_original_file, root_site_data_synth, year, num):
 
     selected_conn_data = find_NN_conn_data(site_data_synth,conn_samples,conn_orig)
     selected_conn_data = anonymize_conn(site_data_synth,selected_conn_data)
-    synth_conn_fn = "Synthetic Data\\Synthetic Data Packages\\"+synth_data_fn.split("\\")[1][9:-3]
+    synth_conn_fn = "synthetic_data\\synthetic_data_packages\\"+synth_data_fn.split("\\")[1][9:-3]
     +"connectivity\\2000\\conn_data"+synth_data_fn.split("\\")[1][9:-3]+"csv"
 
     selected_conn_data.to_csv(synth_conn_fn)

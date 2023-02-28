@@ -5,13 +5,13 @@ from sdv.lite import TabularPreset
 from src.data_processing.preprocess_functions import preprocess_site_data
 from src.data_processing.sampling_functions import sample_rand_radii
 from src.data_processing.postprocess_functions import anonymize_spatial, generate_timestamp
-from src.data_processing.package_synth_data import initialize_data_package,retrieve_orig_site_data_fp
+from src.data_processing.package_synth_data import initialize_data_package,retrieve_orig_site_data_fp, create_synth_site_fp,create_synth_site_data_package_fp
 
 def site_data_model(orig_data_package, N, N2, N3):
     ### --------------------------------------Load site data to synethesize--------------------------------------###
 
     site_data_fn = retrieve_orig_site_data_fp(orig_data_package,".csv")
-    site_data = pd.to_csv(site_data_fn)
+    site_data = pd.read_csv(site_data_fn)
 
     ### ---------------------------------Preprocess data for sdv.TVAE model fit----------------------------------###
     # simplify to dataframe
@@ -33,11 +33,13 @@ def site_data_model(orig_data_package, N, N2, N3):
     ### ------------------------------------------Save site data to csv-------------------------------------------###
     time_stamp = generate_timestamp()
     sample_sites['lat'] = -1*sample_sites['lat']
-    sample_sites.to_csv('Synthetic Data\\site_data_'+time_stamp+'_numsamps_'+str(N2)+'.csv')
+    breakpoint()
+    sample_sites_fn = create_synth_site_fp(time_stamp,N2)
+    sample_sites.to_csv(sample_sites_fn)
     sample_sites_anon = anonymize_spatial(sample_sites)
 
     initialize_data_package(time_stamp+'_numsamps_'+str(N2))
-    synth_site_data_fn = 'Synthetic Data\\Synthetic Data Packages\\'+time_stamp+'_numsamps_'+str(N2)+'\\site_data\\site_data_anon_'+time_stamp+'_numsamps_'+str(N2)+'.csv'
+    synth_site_data_fn = create_synth_site_data_package_fp(time_stamp,N2)
     sample_sites_anon.to_csv(synth_site_data_fn)
 
     return site_data, new_site_data, sample_sites, metadata_site, synth_site_data_fn
