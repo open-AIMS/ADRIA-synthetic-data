@@ -21,10 +21,10 @@ def initialize_data_package(synth_data_stamp):
 def create_synth_site_data_package_fp(time_stamp,N):
     return SYNTH_DATA_PACKAGE_DIR+time_stamp+'_numsamps_'+str(N)+'\\site_data\\site_data_anon_'+time_stamp+'_numsamps_'+str(N)+'.csv'
 
-def create_synth_site_fp(time_stamp,N):
+def create_synth_site_data_fp(time_stamp,N):
     return SYNTH_DATA_DIR+'site_data_'+time_stamp+'_numsamps_'+str(N)+'.csv'
 
-def retrieve_synth_site_fp(synth_data_fn):
+def retrieve_synth_site_data_fp(synth_data_fn):
     return SYNTH_DATA_DIR+synth_data_fn
 
 def retrieve_orig_site_data_fp(orig_data_package,file_type):
