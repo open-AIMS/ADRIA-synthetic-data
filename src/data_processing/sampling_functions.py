@@ -27,15 +27,15 @@ def sample_rand_radii(new_site_data, nrand_sites, n_gen):
     # generate random radii and theta around these points
     rand_radii = np.sqrt(np.random.uniform(0, 1, size=(1, n_gen))[0])*R
     rand_theta = 2*math.pi*np.random.uniform(0, 1, size=(1, n_gen))[0]
-
+    
     for rr in range(len(rand_radii)):
+        
         site = np.random.randint(0, nrand_sites-1, size=(1, 1))[0]
-        rlat_temp = lats[rand_sites[site]] + \
-            rand_radii[rr] * np.cos(rand_theta[rr])
+        rlat_temp = lats[rand_sites[site]] + rand_radii[rr] * np.cos(rand_theta[rr])
+
         if rlat_temp[rand_sites[site][0]] < max_lat and rlat_temp[rand_sites[site][0]] > min_lat:
             rand_lats.append(rlat_temp[rand_sites[site][0]])
-        rlong_temp = longs[rand_sites[site]] + \
-            rand_radii[rr] * np.sin(rand_theta[rr])
+        rlong_temp = longs[rand_sites[site]] + rand_radii[rr] * np.sin(rand_theta[rr])
         if rlong_temp[rand_sites[site][0]] < max_long and rlong_temp[rand_sites[site][0]] > min_long:
             rand_longs.append(rlong_temp[rand_sites[site][0]])
 
