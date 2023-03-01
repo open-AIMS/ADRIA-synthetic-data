@@ -9,7 +9,7 @@ from src.data_processing.postprocess_functions import create_env_nc
 from src.data_processing.package_synth_data import retrieve_orig_env_fp, retrieve_synth_site_data_fp,retrieve_synth_env_data_fp
 
 ### ----------------------------------Load site data and env data to synethesize----------------------------------###
-def env_data_model(root_original_file, root_site_data_synth, rcp, layer):
+def env_data_model(root_original_file, root_site_data_synth, nsamples,rcp, layer):
     original_data_fn = retrieve_orig_env_fp(root_original_file,rcp,layer)
     synth_data_fn = retrieve_synth_site_data_fp(root_site_data_synth)
 
@@ -42,10 +42,12 @@ def env_data_model(root_original_file, root_site_data_synth, rcp, layer):
     selected_years = selected_years*len(site_data_synth.lat.values)
     selected_env_data.insert(4,"year",selected_years,True)
 
-    selected_env_ensemble = sample_env_ensemble(model,context)
+    nsites = len(site_data_synth.lat.values)
+
+    selected_env_ensemble = sample_env_ensemble(model,context,nsamples,nsites,nyears,layer)
 
     synth_env_fn = retrieve_synth_env_data_fp(synth_data_fn,layer)
 
-    create_env_nc(selected_env_ensemble,site_data_synth.lat.values,site_data_synth.long.values,site_data_synth.site_ids,synth_env_fn)
+    create_env_nc(selected_env_ensemble,site_data_synth.lat.values,site_data_synth.long.values,site_data_synth.site_id,layer,synth_env_fn)
 
     return env_df, new_data_env, selected_env_data, metadata_env, nyears, old_years
