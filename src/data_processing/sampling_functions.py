@@ -123,11 +123,11 @@ def find_NN_conn_data(site_data_synth,conn_samples,conn_orig):
 
     synth_lats = site_data_synth['lat']
     synth_longs = site_data_synth['long']
-    samples = np.zeros((len(conn_samples.lats), 2))
+    samples = np.zeros((len(conn_samples.lat), 2))
     site_data_vals = np.zeros((len(synth_lats), 2))
     
-    for l in range(len(conn_samples.lats)):
-        samples[l][:] = [conn_samples.longs[l], conn_samples.lats[l]]
+    for l in range(len(conn_samples.lat)):
+        samples[l][:] = [conn_samples.long[l], conn_samples.lat[l]]
 
     neigh = NearestNeighbors(n_neighbors=1)
     neigh.fit(samples)
