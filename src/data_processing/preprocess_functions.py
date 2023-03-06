@@ -160,8 +160,8 @@ def preprocess_conn_data(site_data,conn_orig):
     :param dataframe conn_orig: original connectivity data.
 
     """
-    lats = site_data.lats
-    longs = site_data.longs
+    lats = site_data.lat
+    longs = site_data.long
     ### ----------------Preprocessing data and appending tidal distance matrices------------------###
     conn_orig.rename(columns={"Unnamed: 0": "recieving_site"}, inplace=True)
     conn_data = conn_orig
