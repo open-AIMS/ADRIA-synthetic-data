@@ -1,4 +1,6 @@
 import pandas as pd
+import geopandas as gp
+from shapely.geometry import Point, Polygon
 import numpy as np
 import netCDF4 as nc
 
@@ -40,6 +42,21 @@ def anonymize_conn(site_data_synth,conn_data_synth):
 
     conn_data_synth_df = pd.DataFrame(conn_data_md)
     return conn_data_synth_df
+
+def convert_to_geo(site_data_synth):
+    R = 6371008.7714 # assumed radius of Earth in m
+    radius = R*np.arccos(1-site_data_synth.area/(2*np.pi*R**2))/(1000^2)
+    lat = -1*site_data_synth.lat
+    long = site_data_synth.long
+
+    # Create circle centre points
+    polygons = []
+    for (x,y,r) in zip(long,lat,radius):
+
+        s_temp = gp.GeoSeries([Point(x,y)])
+        polygons.append(s_temp.buffer(r))
+
+    return polygons
 
 def create_env_nc(store_env,lats,longs,site_ids,layer,fn):
     """
