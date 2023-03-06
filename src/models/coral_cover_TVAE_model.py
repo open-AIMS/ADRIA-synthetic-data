@@ -1,11 +1,11 @@
 import pandas as pd
-import geopandas as gp
+#import geopandas as gp
 import netCDF4
 
 from sdv.tabular import TVAE
 
 from src.data_processing.preprocess_functions import preprocess_cover_data
-from src.data_processing.package_synth_data import retrieve_synth_site_data_fp, retrieve_orig_site_data_fp, retrieve_orig_cover_fp
+from src.data_processing.package_synth_data import retrieve_synth_site_data_fp, retrieve_orig_site_data_fp, retrieve_orig_cover_fp, retrieve_synth_cover_fp
 from src.data_processing.sampling_functions import create_cover_conditional_struct
 from src.data_processing.postprocess_functions import make_cover_array, create_cover_nc
 
@@ -34,6 +34,7 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
     synth_sampled = model.sample_remaining_columns(conditions,max_tries_per_batch=500)
 
     array_synth_sampled = make_cover_array(synth_sampled)
-    create_cover_nc(array_synth_sampled, root_site_data_synth)
+    cover_fn = retrieve_synth_cover_fp(root_site_data_synth[10:-4])
+    create_cover_nc(array_synth_sampled, cover_fn)
 
     return cover_df, synth_cover, synth_sampled, metadata_cover, root_site_data_synth
