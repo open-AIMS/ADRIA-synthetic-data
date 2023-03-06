@@ -35,6 +35,9 @@ def retrieve_orig_conn_fp(orig_data_package,year,num):
 
 def retrieve_orig_cover_fp(orig_data_package):
     return ORIG_DATA_DIR+orig_data_package+'\\site_data\\coral_cover.nc'
+
+def retrieve_synth_cover_fp(synth_data_package):
+    return SYNTH_DATA_PACKAGE_DIR+synth_data_package+'\\site_data\\coral_cover.nc'
  
 def retrieve_orig_env_fp(orig_data_package,rcp,layer):
     if layer=='dhw':
