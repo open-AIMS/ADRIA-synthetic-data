@@ -2,15 +2,15 @@ import pandas as pd
 import numpy as np
 
 from src.data_processing.preprocess_functions import preprocess_conn_data
-from GAN_model import GAN
+from src.models.GAN_model import GAN
 from src.data_processing.postprocess_functions import anonymize_conn
 from src.data_processing.sampling_functions import find_NN_conn_data
-from src.data_processing.package_synth_data import retrieve_synth_site_data_fp, retrieve_orig_site_data_fp, retrieve_orig_conn_fp
+from src.data_processing.package_synth_data import retrieve_synth_site_data_fp, retrieve_orig_site_data_fp, retrieve_orig_conn_fp, retrieve_synth_conn_data_fp
 
 ### -----------------------------Load site data and connectivity data to synethesize----------------------------###
 def connectivity_model(root_original_file, root_site_data_synth, year, num):
     original_conn_fn = retrieve_orig_conn_fp(root_original_file,year,num)
-    orginal_site_data_fn = retrieve_orig_site_data_fp(root_original_file)
+    orginal_site_data_fn = retrieve_orig_site_data_fp(root_original_file,'.csv')
     synth_data_fn = retrieve_synth_site_data_fp(root_site_data_synth)
 
     conn_orig = pd.read_csv(original_conn_fn,skiprows=3)
@@ -70,8 +70,7 @@ def connectivity_model(root_original_file, root_site_data_synth, year, num):
 
     selected_conn_data = find_NN_conn_data(site_data_synth,conn_samples,conn_orig)
     selected_conn_data = anonymize_conn(site_data_synth,selected_conn_data)
-    synth_conn_fn = "synthetic_data\\synthetic_data_packages\\"+synth_data_fn.split("\\")[1][9:-3]
-    +"connectivity\\2000\\conn_data"+synth_data_fn.split("\\")[1][9:-3]+"csv"
+    synth_conn_fn = retrieve_synth_conn_data_fp(root_site_data_synth)
 
     selected_conn_data.to_csv(synth_conn_fn)
 
