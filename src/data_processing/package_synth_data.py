@@ -13,10 +13,12 @@ def initialize_data_package(synth_data_stamp):
     SITE_DATA_DIR = os.path.join(synth_data_set_folder, "site_data")
     CONN_DATA_DIR = os.path.join(synth_data_set_folder, "connectivity","2000")
     DHW_DATA_DIR = os.path.join(synth_data_set_folder, "DHWs")
+    WAVE_DATA_DIR = os.path.join(synth_data_set_folder, "waves")
 
     os.makedirs(SITE_DATA_DIR)
     os.makedirs(CONN_DATA_DIR)
     os.makedirs(DHW_DATA_DIR)
+    os.makedirs(WAVE_DATA_DIR)
 
 def create_synth_site_data_package_fp(time_stamp,N):
     return SYNTH_DATA_PACKAGE_DIR+time_stamp+'_numsamps_'+str(N)+'\\site_data\\site_data_anon_'+time_stamp+'_numsamps_'+str(N)+'.csv'
@@ -51,10 +53,15 @@ def retrieve_orig_env_fp(orig_data_package,rcp,layer):
 
     return ORIG_DATA_DIR+orig_data_package+file_loc+file
 
-def retrieve_synth_env_data_fp(synth_data_fn,layer):
+def retrieve_synth_env_data_fp(synth_data_fn,layer,rcp):
     if layer=='dhw':
         file_loc = "\\DHWs\\"
+        file_name = "dhwRCP"+rcp
     elif layer=='Ub':
         file_loc = "\\waves\\"
+        file_name = "wave_RCP"+rcp
 
-    return SYNTH_DATA_PACKAGE_DIR+synth_data_fn.split("\\")[1][9:-3]+file_loc+layer+"_"+synth_data_fn.split("\\")[1][9:-3]+"nc"
+    return SYNTH_DATA_PACKAGE_DIR+synth_data_fn[10:-4]+file_loc+file_name+".nc"
+
+def retrieve_synth_conn_data_fp(synth_data_fn):
+    return SYNTH_DATA_PACKAGE_DIR+synth_data_fn[10:-4]+"\\connectivity\\2000\\connectivity.csv"
