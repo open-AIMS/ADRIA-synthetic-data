@@ -44,22 +44,32 @@ def anonymize_conn(site_data_synth,conn_data_synth):
         conn_data_md[columns[kk]] = conn_data_synth[:,kk]
 
     conn_data_synth_df = pd.DataFrame(conn_data_md)
+
     return conn_data_synth_df
 
 def convert_to_geo(site_data_synth):
     R = 6371008.7714 # assumed radius of Earth in m
-    radius = R*np.arccos(1-site_data_synth.area/(2*np.pi*R**2))/(1000^2)
-    lat = -1*site_data_synth.lat
+    radius = R*np.arccos(1-(site_data_synth.area/(2*np.pi*R**2)))
+    lat = site_data_synth.lat
     long = site_data_synth.long
 
     # Create circle centre points
-    polygons = []
+
+    site_data_synth['geometry']=list(zip(site_data_synth.long,site_data_synth.lat))
+    site_data_synth['geometry']=site_data_synth['geometry'].apply(Point)
+    site_data_geo_synth =  gp.GeoDataFrame(site_data_synth,geometry='geometry',crs={'init':'epsg:3395'})
+    
+    aa = 0
+
     for (x,y,r) in zip(long,lat,radius):
+        s_temp = gp.GeoSeries([Point(x,y)],crs={'init':'epsg:4326'})
+        s_temp = s_temp.to_crs({'init':'epsg:3395'})
+        site_data_geo_synth['geometry'][aa] = s_temp.buffer(r)[0]
+        aa+=1
 
-        s_temp = gp.GeoSeries([Point(x,y)])
-        polygons.append(s_temp.buffer(r))
-
-    return polygons
+    site_data_geo_synth = site_data_geo_synth.drop(["lat","long"], axis = "columns")
+    
+    return site_data_geo_synth
 
 def create_env_nc(store_env,lats,longs,site_ids,layer,fn):
     """
