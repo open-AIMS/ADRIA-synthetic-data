@@ -127,16 +127,17 @@ def find_NN_conn_data(site_data_synth,conn_samples,conn_orig):
     site_data_vals = np.zeros((len(synth_lats), 2))
     
     for l in range(len(conn_samples.lat)):
-        samples[l][:] = [conn_samples.long[l], conn_samples.lat[l]]
-
-    neigh = NearestNeighbors(n_neighbors=1)
+        samples[l][:] = [conn_samples.lat[l], conn_samples.long[l]]
+    
+    neigh = NearestNeighbors(n_neighbors=1,metric = 'haversine')
     neigh.fit(samples)
 
     for k in range(len(synth_lats)):
-        site_data_vals[k][:] = [-synth_lats[k], synth_longs[k]]
+        site_data_vals[k][:] = [synth_lats[k], synth_longs[k]]
 
     nearest_sites = neigh.kneighbors(site_data_vals, return_distance=False)
     nearest_site_inds = [nearest_sites[kk][0] for kk in range(len(nearest_sites))]
+    breakpoint()
     selected_conn_data = np.zeros([len(nearest_site_inds),len(nearest_site_inds)],dtype=float)
     conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
     selected_conn_data = conn_samples_array[nearest_site_inds,:]
