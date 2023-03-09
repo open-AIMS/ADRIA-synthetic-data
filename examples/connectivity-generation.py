@@ -1,5 +1,6 @@
 import sys
 sys.path.append("..")
+
 from src.models.connectivity_GAN_model import connectivity_model
 
 from sdmetrics.reports.single_table import QualityReport
