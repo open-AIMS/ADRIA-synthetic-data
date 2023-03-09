@@ -17,16 +17,18 @@ def generate_timestamp():
     ts_string = str(ts.day)+"-"+str(ts.month)+"-"+str(ts.year)+"_"+str(ts.hour)+str(ts.minute)+str(ts.second)
     return ts_string
 
-def anonymize_spatial(spatial):
+def anonymize_spatial(site_data_geo_synth):
     """
-    Normalise latitude and longitude data to remove physical reference.
+    Translate geometries of site data to randomised distance from the synthesized dataset,
+    then transform back to lats and longs.
 
-    :param dataframe spatial: contains columns 'lat'- latitudes and 'long' - longitudes.
+    :param geodataframe site_data_geo_synth: synthetic site data with geometry in epsg3395
 
     """
-    scaler = MinMaxScaler().fit(spatial[['lat','long']])
-    spatial[['lat','long']] = scaler.transform(spatial[['lat','long']])
-    return spatial
+    site_data_geo_synth['geometry'] = site_data_geo_synth.translate(rd.uniform(-1000000,1000000),rd.uniform(-1000000,1000000))
+    site_data_geo_synth = site_data_geo_synth.to_crs({'init':'epsg:4326'})
+
+    return site_data_geo_synth
 
 def anonymize_conn(site_data_synth,conn_data_synth):
     """
