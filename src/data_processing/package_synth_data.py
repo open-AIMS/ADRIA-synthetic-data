@@ -70,3 +70,17 @@ def retrieve_synth_env_data_fp(synth_data_fn,layer,rcp):
 
 def retrieve_synth_conn_data_fp(synth_data_fn):
     return SYNTH_DATA_PACKAGE_DIR+synth_data_fn[10:-4]+"\\connectivity\\2000\\connectivity.csv"
+
+def create_dp_jason(orig_data_package_path,synth_data_package_name):
+    with open(orig_data_package_path+"\\datapackage.json","r+") as f:
+        data = json.load(f)
+    breakpoint()
+    data['name'] = synth_data_package_name # <--- add `id` value.
+    data['title'] = "Synthetic data package" # <--- add `id` value.
+    data["description"] = "Data package synthesised from actual data package for ADRIA."
+    data["resources"][0]['path'] = 'site_data\\'+synth_data_package_name+".gpkg"
+    synth_data_package_path = retrieve_synth_data_package_path(synth_data_package_name)
+
+    with open(synth_data_package_path+"\\datapackage.json", 'w') as f:
+        json.dump(data, f, indent=4)
+
