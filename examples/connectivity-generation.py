@@ -1,10 +1,12 @@
+import sys
+sys.path.append("..")
 from src.models.connectivity_GAN_model import connectivity_model
 
 from sdmetrics.reports.single_table import QualityReport
 
 ### ------------------------------------------------Key Inputs---------------------------------------------------###
 root_original_file = 'Moore_2022-11-17'
-root_site_data_synth = 'site_data_23-2-2023_10551_numsamps_30.csv'
+root_site_data_synth = 'site_data_7-3-2023_154918_numsamps_100.csv'
 year = "2015" # connectivity data year to use
 num = "3" # connectivity data sample number to use
 
