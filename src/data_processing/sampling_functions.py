@@ -12,8 +12,7 @@ def sample_rand_radii(new_site_data, nrand_sites, n_gen):
    :param int nrand_sites: number of site positions to generate.
    :param int n_gen: number of sites to generate around site positions.
    """
-    rand_sites = np.random.randint(
-        0, len(new_site_data.lat), size=(1, nrand_sites))[0]
+    rand_sites = np.unique(np.random.randint(0, len(new_site_data.lat), size=(1, nrand_sites))[0])
     max_lat = max(new_site_data.lat)
     min_lat = min(new_site_data.lat)
     max_long = max(new_site_data.long)
@@ -30,12 +29,13 @@ def sample_rand_radii(new_site_data, nrand_sites, n_gen):
     
     for rr in range(len(rand_radii)):
         
-        site = np.random.randint(0, nrand_sites-1, size=(1, 1))[0]
+        site = np.unique(np.random.randint(0, len(rand_sites)-1, size=(1, 1))[0])
         rlat_temp = lats[rand_sites[site]] + rand_radii[rr] * np.cos(rand_theta[rr])
 
         if rlat_temp[rand_sites[site][0]] < max_lat and rlat_temp[rand_sites[site][0]] > min_lat:
             rand_lats.append(rlat_temp[rand_sites[site][0]])
         rlong_temp = longs[rand_sites[site]] + rand_radii[rr] * np.sin(rand_theta[rr])
+
         if rlong_temp[rand_sites[site][0]] < max_long and rlong_temp[rand_sites[site][0]] > min_long:
             rand_longs.append(rlong_temp[rand_sites[site][0]])
 
