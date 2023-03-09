@@ -9,6 +9,8 @@ import numpy as np
 ### ----------------GAN model definitions------------------###
 # define the GAN model (taken from GitHub repo :https://github.com/ydataai/ydata-synthetic )
 
+file_dir = os.path.dirname(os.path.abspath(__file__))
+GAN_MOD_DIR = file_dir[:-11]+"\\src\\models\\"
 
 class GAN:
     def __init__(self, gan_args):
@@ -102,8 +104,9 @@ class GAN:
             if epoch % sample_interval == 0:
                 # Test here data generation step
                 # save model checkpoints
+
                 model_checkpoint_base_name = (
-                    "model/" + cache_prefix + "_{}_model_weights_step_{}.h5"
+                    GAN_MOD_DIR+"model\\" + cache_prefix + "_{}_model_weights_step_{}.h5"
                 )
                 self.generator.save_weights(
                     model_checkpoint_base_name.format("generator", epoch)
