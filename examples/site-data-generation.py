@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 from sdv.evaluation import evaluate
 from sdv.metrics.tabular import LogisticDetection
 from sdmetrics.reports.single_table import QualityReport
