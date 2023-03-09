@@ -9,6 +9,7 @@ from src.data_processing.package_synth_data import retrieve_synth_site_data_fp, 
 from src.data_processing.sampling_functions import create_cover_conditional_struct
 from src.data_processing.postprocess_functions import make_cover_array, create_cover_nc
 
+from src.data_processing.postprocess_functions import convert_to_geo
 ###---------------------------------------Load site data to synethesize------------------------------------------###
 def coral_cover_model(root_original_file, root_site_data_synth, N):
     original_cover_data_fn = retrieve_orig_cover_fp(root_original_file)
