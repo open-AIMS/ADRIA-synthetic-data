@@ -1,10 +1,11 @@
 import pandas as pd
-import geopandas as gp
-from shapely.geometry import Point, Polygon
+#import geopandas as gp
+#from shapely.geometry import Point
+
+import random as rd
 import numpy as np
 import netCDF4 as nc
 
-from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime as dt
 
 def generate_timestamp():
