@@ -54,10 +54,9 @@ def connectivity_model(root_original_file, root_site_data_synth, year, num):
 
     models = {"GAN": ["GAN", False, synthesizer.generator]}
 
-    breakpoint()
     # Setup parameters visualization parameters
     seed = 17
-    test_size = 200  # number of sites
+    test_size = 216  # number of sites
     noise_dim = 32
 
     ### -----------------------------Sample data and transform to original data space--------------------------------###
