@@ -34,7 +34,7 @@ report.generate(env_df, new_data_env, metadata_env)
 report.get_details(property_name='Column Shapes')
 
 ### ------------------------------------------ Plot data as timeseries ----------------------------------------- ###
-outcomes_data,outcomes_synth = get_data_quantiles(env_df,new_data_env,nyears,old_years,new_data_env['year'])
+outcomes_data,outcomes_synth = get_data_quantiles(env_df,new_data_env,nyears,old_years,new_data_env['year'],layer)
 
 fig_data = create_timeseries(outcomes_data, label="Original "+layer+" Data")
 fig_data.show()
@@ -44,7 +44,7 @@ fig_synth.show()
 
 ### ----------------------------------------------- Plot sampled data ------------------------------------------ ###
 
-outcomes_data,outcomes_synth_selected = get_data_quantiles(env_df,selected_env_data,nyears,old_years,selected_env_data["year"])
+outcomes_data,outcomes_synth_selected = get_data_quantiles(env_df,selected_env_data,nyears,old_years,selected_env_data["year"],layer)
 
 fig_synth = create_timeseries(outcomes_synth_selected, label="Synthetic sampled "+layer+" data")
 fig_synth.show()
