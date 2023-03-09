@@ -12,7 +12,7 @@ from src.models.site_data_fastML_model import site_data_model
 
 orig_data_package = "Moore_2022-11-17"
 
-site_data, new_site_data, sample_sites, metadata_site, synth_site_data_fn = site_data_model(orig_data_package, 300, 30, 10)
+site_data, new_site_data, sample_sites, metadata_site, synth_site_data_fn = site_data_model(orig_data_package, 500, 100, 50)
 
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
 
