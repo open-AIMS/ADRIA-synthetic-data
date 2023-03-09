@@ -71,6 +71,6 @@ def connectivity_model(root_original_file, root_site_data_synth, year, num):
     selected_conn_data = anonymize_conn(site_data_synth,selected_conn_data)
     synth_conn_fn = retrieve_synth_conn_data_fp(root_site_data_synth)
 
-    selected_conn_data.to_csv(synth_conn_fn)
+    selected_conn_data.to_csv(synth_conn_fn, index = False)
 
     return conn_orig, conn_samples, selected_conn_data, metadata_conn, synth_conn_fn
