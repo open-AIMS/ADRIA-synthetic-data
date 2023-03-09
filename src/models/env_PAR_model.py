@@ -46,7 +46,7 @@ def env_data_model(root_original_file, root_site_data_synth, nsamples,rcp, layer
 
     selected_env_ensemble = sample_env_ensemble(model,context,nsamples,nsites,nyears,layer)
 
-    synth_env_fn = retrieve_synth_env_data_fp(synth_data_fn,layer)
+    synth_env_fn = retrieve_synth_env_data_fp(root_site_data_synth,layer,rcp)
 
     create_env_nc(selected_env_ensemble,site_data_synth.lat.values,site_data_synth.long.values,site_data_synth.site_id,layer,synth_env_fn)
 
