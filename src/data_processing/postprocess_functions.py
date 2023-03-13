@@ -83,8 +83,9 @@ def create_env_nc(store_env,lats,longs,site_ids,layer,fn):
     :param fn: filename for nc data set to be saved as.
 
     """
+    n_sites = len(site_ids)
     ds = nc.Dataset(fn, 'w')
-    ds.createDimension('sites', len(site_ids))
+    ds.createDimension('sites', n_sites)
     ds.createDimension('member',store_env.shape[0])
     ds.createDimension('timesteps', store_env.shape[2])
 
@@ -96,8 +97,9 @@ def create_env_nc(store_env,lats,longs,site_ids,layer,fn):
 
     longitude[:] = lats
     latitude[:] = longs
-    reef_siteid[:] = np.array([str(k) for k in site_ids])
-    UNIQUE_ID[:] = np.array([str(k) for k in site_ids])
+    breakpoint()
+    reef_siteid[:] = np.array(['reef_'+str(k) for k in range(1,n_sites+1)])
+    UNIQUE_ID[:] = np.array(['reef_'+str(k) for k in range(1,n_sites+1)])
     dhw[:,:,:] = store_env
     ds.close()
 
@@ -135,6 +137,6 @@ def create_cover_nc(store_cover,fn):
     reef_siteid = ds.createVariable('reef_siteid', str, ('reef_siteid',))
     breakpoint()
     covers[:,:] = store_cover
-    reef_siteid[:] = np.array([str(ii) for ii in range(1,n_sites+1)])
-
+    reef_siteid[:] = np.array(['reef_'+str(ii) for ii in range(1,n_sites+1)])
+    
     ds.close()
