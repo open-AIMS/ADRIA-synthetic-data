@@ -25,11 +25,11 @@ def retrieve_orig_data_package_path(orig_data_package):
 def retrieve_synth_data_package_path(synth_data_package):
     return SYNTH_DATA_PACKAGE_DIR+synth_data_package
 
-def create_synth_site_data_package_fp(time_stamp,N):
-    return SYNTH_DATA_PACKAGE_DIR+time_stamp+'_numsamps_'+str(N)+'\\site_data\\'+time_stamp+'_numsamps_'+str(N)+'.gpkg'
+def create_synth_site_data_package_fp(time_stamp):
+    return SYNTH_DATA_PACKAGE_DIR+'synth_'+time_stamp+'\\site_data\\'+'synth_'+time_stamp+'.gpkg'
 
-def create_synth_site_data_fp(time_stamp,N):
-    return SYNTH_DATA_DIR+'site_data_'+time_stamp+'_numsamps_'+str(N)+'.csv'
+def create_synth_site_data_fp(time_stamp):
+    return SYNTH_DATA_DIR+'site_data_'+'synth_'+time_stamp+'.csv'
 
 def retrieve_synth_site_data_fp(synth_data_fn):
     return SYNTH_DATA_DIR+synth_data_fn
