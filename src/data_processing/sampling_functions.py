@@ -70,7 +70,7 @@ def sample_env_ensemble(model,context,nsamples,nsites,nyears,layer):
     :param str: indicates the data layer ('dhw' or 'wave')
 
     """
-    store_env = np.zeros([nsamples,nsites,nyears])
+    store_env = np.zeros([nyears,nsites,nsamples])
     for ss in range(nsamples):
         sample_temp = model.sample(context=context)
         for si in range(nsites):
