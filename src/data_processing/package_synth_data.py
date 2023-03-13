@@ -79,6 +79,7 @@ def create_dp_jason(orig_data_package_path,synth_data_package_name):
     data['title'] = "Synthetic data package" # <--- add `id` value.
     data["description"] = "Data package synthesised from actual data package for ADRIA."
     data["resources"][0]['path'] = 'site_data\\'+synth_data_package_name+".gpkg"
+    data["contributors"] = []
     synth_data_package_path = retrieve_synth_data_package_path(synth_data_package_name)
 
     with open(synth_data_package_path+"\\datapackage.json", 'w') as f:
