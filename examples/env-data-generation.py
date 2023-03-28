@@ -11,12 +11,12 @@ from sdmetrics.reports.single_table import QualityReport
 
 ### ------------------ Use model to generate synthetic env data and sampled synthetic env data ----------------- ###
 
-# layer = 'dhw'
+#layer = 'dhw'
 layer = 'Ub'
 rcp = '45'
 root_original_file = 'Moore_2022-11-17'
-root_site_data_synth = 'site_data_28-2-2023_164233_numsamps_30.csv'
-nsamples = 30
+root_site_data_synth = 'site_data_7-3-2023_154918.csv'
+nsamples = 50
 
 env_df, new_data_env, selected_env_data, metadata_env, nyears, old_years = env_data_model(root_original_file, root_site_data_synth, nsamples, rcp, layer)
 breakpoint()

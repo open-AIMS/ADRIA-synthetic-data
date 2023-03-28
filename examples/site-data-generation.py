@@ -27,13 +27,14 @@ LogisticDetection.compute(site_data, new_site_data)
 report = QualityReport()
 report.generate(site_data, new_site_data, metadata_site)
 report.get_details(property_name='Column Shapes')
-report.get_details(property_name='Pair Trends')
+report.get_details(property_name='Column Pair Trends')
 
 # evaluate K-S score
-evaluate(sample_sites, new_site_data)
+cols = new_site_data.columns
+evaluate(sample_sites[cols], new_site_data)
 
 # Ml ability to detec difference between (1 minus ROC AUC score for ML classifier)
-LogisticDetection.compute(site_data, sample_sites)
+LogisticDetection.compute(site_data, sample_sites[cols])
 
 ### ------------------------------ Visual data comparison using plotting tools --------------------------------- ###
 figs = comparison_plots_site_data(sample_sites, new_site_data, site_data)
