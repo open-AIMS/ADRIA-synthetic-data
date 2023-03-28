@@ -12,7 +12,7 @@ def preprocess_site_data(site_data):
     # get rid of identifying ids
     site_data = site_data.drop('reef_siteid', axis=1)
     site_ids = pd.DataFrame(
-        {'site_id': [i for i in range(1, len(site_data['site_id'])+1)]})
+        {'site_id': [i for i in range(0, len(site_data['site_id']))]})
     site_data = site_data.drop('site_id', axis=1)
     site_data = site_data.drop('UNIQUE_ID', axis=1)
     site_data = site_data.drop('Reef', axis=1)
@@ -50,7 +50,7 @@ def convert_to_csv(site_data_geo, csv_fn):
     site_data = site_data_geo[site_data_geo.columns[:-1]]
     site_data['long'] = site_data_geo.centroid.x
     site_data['lat'] = site_data_geo.centroid.y
-    site_data.to_csv(csv_fn[:-4]+"csv")
+    site_data.to_csv(csv_fn[:-4]+"csv",index = False)
 
 def preprocess_env_data(env_data, layer):
     """

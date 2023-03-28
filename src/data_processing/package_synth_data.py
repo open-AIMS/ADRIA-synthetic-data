@@ -1,13 +1,14 @@
 import os
 import json
+
 global SYNTH_DATA_PACKAGE_DIR, SYNTH_DATA_DIR, ORIG_DATA_DIR
 file_dir = os.path.dirname(os.path.abspath(__file__))
 SYNTH_DATA_PACKAGE_DIR = file_dir[:-19]+"synthetic_data\\synthetic_data_packages\\"
 SYNTH_DATA_DIR = file_dir[:-19]+"synthetic_data\\"
 ORIG_DATA_DIR = file_dir[:-19]+"original_data\\"
 
-def initialize_data_package(synth_data_stamp):
-    synth_data_set_folder = SYNTH_DATA_PACKAGE_DIR+synth_data_stamp
+def initialize_data_package(time_stamp):
+    synth_data_set_folder = SYNTH_DATA_PACKAGE_DIR+'synth_'+time_stamp
 
     SITE_DATA_DIR = os.path.join(synth_data_set_folder, "site_data")
     CONN_DATA_DIR = os.path.join(synth_data_set_folder, "connectivity","2000")

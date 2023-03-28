@@ -1,6 +1,6 @@
 import pandas as pd
-#import geopandas as gp
-#from shapely.geometry import Point
+import geopandas as gp
+from shapely.geometry import Point
 
 import random as rd
 import numpy as np
@@ -135,7 +135,7 @@ def create_cover_nc(store_cover,fn):
 
     covers = ds.createVariable('covers', 'f4', ('reef_siteid','species'))
     reef_siteid = ds.createVariable('reef_siteid', str, ('reef_siteid',))
-    breakpoint()
+
     covers[:,:] = store_cover
     reef_siteid[:] = np.array(['reef_'+str(ii) for ii in range(1,n_sites+1)])
     
