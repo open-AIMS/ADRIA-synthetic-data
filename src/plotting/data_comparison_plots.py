@@ -1,6 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objects as go
+import pandas as pd
+
+plt.rc('font', size=14) #controls default text size
+plt.rc('axes', titlesize=12) #fontsize of the title
+plt.rc('axes', labelsize=12) #fontsize of the x and y labels
+plt.rc('xtick', labelsize=10) #fontsize of the x tick labels
+plt.rc('ytick', labelsize=10) #fontsize of the y tick labels
 
 def plot_comparison_scatter(sample_sites,new_site_data,site_data,colour,size):
     """
@@ -26,7 +33,7 @@ def plot_comparison_scatter(sample_sites,new_site_data,site_data,colour,size):
     axes[0].set(xlabel='lat', ylabel='long')
     axes[2].set(xlabel='lat', ylabel='long')
     fig.show()
-    return fig, axes
+    return fig
 
 def plot_comparison_hist(sample_sites,new_site_data,site_data,parameter):
     """
@@ -37,17 +44,18 @@ def plot_comparison_hist(sample_sites,new_site_data,site_data,parameter):
     :param data_frame site_data: original site data.
     :param str parameter: site data variable to be represented as histogram.
     """
-    fig2, axes = plt.subplots(1, 3)
-    axes[0].hist(new_site_data[parameter], bins=round(np.sqrt(new_site_data.shape[0])))
-    axes[1].hist(site_data[parameter], bins=round(np.sqrt(site_data.shape[0])))
-    axes[2].hist(sample_sites[parameter], bins=round(np.sqrt(sample_sites.shape[0])))
+    fig, axes = plt.subplots(1, 3)
+    axes[0].hist(new_site_data[parameter], bins=round(np.sqrt(new_site_data.shape[0])), density=True, color = "skyblue", lw=0)
+    axes[1].hist(site_data[parameter], bins=round(np.sqrt(site_data.shape[0])), density=True, color = "purple", lw=0)
+    axes[2].hist(sample_sites[parameter], bins=round(np.sqrt(sample_sites.shape[0])), density=True, color = "pink", lw=0)
     axes[1].set_title('Original')
     axes[0].set_title('Synthetic')
     axes[2].set_title('Sampled')
-    axes[1].set(xlabel=parameter, ylabel='counts')
-    axes[0].set(xlabel=parameter, ylabel='counts')
-    axes[2].set(xlabel=parameter, ylabel='counts')
-    fig2.show()
+    axes[1].set(xlabel=parameter, ylabel='p')
+    axes[0].set(xlabel=parameter, ylabel='p')
+    axes[2].set(xlabel=parameter, ylabel='p')
+    fig.show()
+    return fig
 
 def get_data_quantiles(env_df,new_data_env,nyears,old_years,new_years,layer):
     """
@@ -132,13 +140,26 @@ def create_timeseries(outcomes, label="", color_code="rgba(255, 0, 0, "):
     return fig_data
 
 def comparison_plots_site_data(sample_sites, new_site_data, site_data):
-    fig1, axes = plot_comparison_scatter(sample_sites,new_site_data,site_data,'area','k')
+    fig1 = plot_comparison_scatter(sample_sites,new_site_data,site_data,'area','k')
+    breakpoint()
+    fig2 = plot_comparison_hist(sample_sites,new_site_data,site_data,'area')
+    fig3 = plot_comparison_hist(sample_sites,new_site_data,site_data,'k')
+    fig4 = plot_comparison_hist(sample_sites,new_site_data,site_data,'sand')
+    fig5 = plot_comparison_hist(sample_sites,new_site_data,site_data,'rock')
+    fig6 = plot_comparison_hist(sample_sites,new_site_data,site_data,'rubble')
+    fig7 = plot_comparison_hist(sample_sites,new_site_data,site_data,'coral_algae')
+    fig8 = plot_comparison_hist(sample_sites,new_site_data,site_data,'depth_mean')
+    fig9 = plot_comparison_hist(sample_sites,new_site_data,site_data,'zone_type')
 
-    fig2, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'area')
-    fig3, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'k')
-    fig4, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'Reef')
-    fig5, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'habitat')
-    fig6, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'sitedepth')
-    fig7, axes = plot_comparison_hist(sample_sites,new_site_data,site_data,'rubble')
+    return [fig1,fig2,fig3,fig4,fig5,fig6,fig7,fig8,fig9]
 
-    return [fig1,fig2,fig3,fig4,fig5,fig6,fig7]
+def compared_cover_species_hist(cover_df,synth_cover,synth_sampled):
+    synth_sampled_cover = [sum(synth_sampled.cover[synth_sampled.species==k])/sum(synth_sampled.cover) for k in range(1,37)]
+    synth_cover = [sum(synth_cover.cover[synth_cover.species==k])/sum(synth_cover.cover) for k in range(1,37)]
+    orig_cover = [sum(cover_df.cover[cover_df.species==k])/sum(cover_df.cover) for k in range(1,37)]
+
+    cover_species_df = pd.DataFrame({'Species':np.array([str(k) for k in range(1,37)]),'Original':orig_cover,'Synthetic':synth_cover,'Sampled':synth_sampled_cover})
+
+    cover_species_df.plot(x='Species', kind='bar', stacked=True, title='Cover for species')
+    plt.xticks(rotation='horizontal')
+    plt.show()
