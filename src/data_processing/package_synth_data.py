@@ -86,3 +86,12 @@ def create_dp_jason(orig_data_package_path,synth_data_package_name):
     with open(synth_data_package_path+"\\datapackage.json", 'w') as f:
         json.dump(data, f, indent=4)
 
+def save_csv_plotting(orig_df,synth_df,synth_sampled_df,fn,type):
+
+    file_name = SYNTH_DATA_DIR+type+"_orig_plotting_"+fn
+    file_name_synth = SYNTH_DATA_DIR+type+"_synth_plotting_"+fn
+    file_name_sampled = SYNTH_DATA_DIR+type+"_samp_plotting_"+fn
+
+    orig_df.to_csv(file_name,index=False)
+    synth_df.to_csv(file_name_synth,index=False)
+    synth_sampled_df.to_csv(file_name_sampled,index=False)
