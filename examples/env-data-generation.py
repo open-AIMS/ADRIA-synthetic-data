@@ -12,13 +12,17 @@ from sdv.metrics.tabular import LogisticDetection
 from sdv.metrics.timeseries import LSTMDetection
 from sdmetrics.reports.single_table import QualityReport
 
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 ### ------------------ Use model to generate synthetic env data and sampled synthetic env data ----------------- ###
 
-# layer = "dhw"
-layer = "Ub"
+layer = "dhw"
+# layer = "Ub"
 rcp = "45"
 root_original_file = "Moore_2022-11-17"
-root_site_data_synth = "site_data_synth_19-5-2023_105441.csv"
+root_site_data_synth = "site_data_synth_6-6-2023_144117.csv"
 nsamples = 50
 
 (
@@ -38,10 +42,16 @@ breakpoint()
 
 # # evaluate and report values should be high for quality data
 # # report values should be high
-# evaluate(new_data_env, env_df)
-# report = QualityReport()
-# report.generate(env_df, new_data_env, metadata_env)
-# report.get_details(property_name='Column Shapes')
+evaluate(new_data_env, env_df[env_df.columns[[0, 1, 2, 3, 5]]])
+env_df["year"] = [yr.year for yr in env_df.year]
+new_data_env["year"] = [int(yr) for yr in new_data_env.year]
+report = QualityReport()
+report.generate(
+    env_df[env_df.columns[[0, 1, 2, 3, 5]]],
+    new_data_env,
+    metadata_env,
+)
+report.get_details(property_name="Column Shapes")
 
 ### ------------------------------------------ Plot data as timeseries ----------------------------------------- ###
 outcomes_data, outcomes_synth = get_data_quantiles(
@@ -54,6 +64,12 @@ go.Figure(fig_data).show()
 fig_synth = create_timeseries(outcomes_synth, label="Synthetic " + layer + " Data")
 go.Figure(fig_synth).show()
 
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+years = [yr.year for yr in env_df.year]
+ax.bar3d(years, env_df.site, np.zeros(len(env_df.Ub)), 1, 1, env_df.Ub)
+ax.set_ylim([0, 215])
+plt.show()
 ### ----------------------------------------------- Plot sampled data ------------------------------------------ ###
 
 outcomes_data, outcomes_synth_selected = get_data_quantiles(

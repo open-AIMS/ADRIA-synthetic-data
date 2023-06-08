@@ -24,7 +24,7 @@ orig_data_package = "Moore_2022-11-17"
     sample_sites,
     metadata_site,
     synth_site_data_fn,
-) = site_data_model(orig_data_package, 500, 20, 4)
+) = site_data_model(orig_data_package, 500, 120, 10)
 breakpoint()
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
 
