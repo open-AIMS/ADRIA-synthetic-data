@@ -29,7 +29,7 @@ def env_data_model(root_original_file, root_site_data_synth, nsamples, rcp, laye
     data_types, metadata_env = initialize_env_data(layer)
     nreps, nsites, nyears = ENV[layer].shape
 
-    store_env_synth = np.zeros([nsites, nsamples, nyears])
+    store_env_synth = np.zeros([nyears, len(site_data_synth.site_id), nsamples])
 
     env_df, old_years, nyears = preprocess_env_data(
         ENV, layer, nyears, nsites, nsamples
@@ -53,7 +53,7 @@ def env_data_model(root_original_file, root_site_data_synth, nsamples, rcp, laye
         new_data_env = model.sample(N_s)
         new_years = [str(yr + 2025) for yr in range(nyears)]
         new_years = new_years * N_s
-        if len(new_data_env) != len(new_years):
+
             breakpoint()
         new_data_env["year"] = new_years
 
@@ -73,7 +73,7 @@ def env_data_model(root_original_file, root_site_data_synth, nsamples, rcp, laye
         sample_temp = model.sample(context=context)
 
         for si in range(nsites):
-            store_env_synth[rep_ind, si, :] = sample_temp[layer][
+            store_env_synth[:, si, rep_ind] = sample_temp[layer][
                 sample_temp["site"] == si
             ]
     # selected_env_ensemble = sample_env_ensemble(
