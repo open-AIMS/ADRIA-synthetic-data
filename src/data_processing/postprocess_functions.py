@@ -106,8 +106,8 @@ def create_env_nc(store_env, lats, longs, site_ids, layer, fn):
     n_sites = len(site_ids)
     ds = nc.Dataset(fn, "w")
     ds.createDimension("sites", n_sites)
-    ds.createDimension("member", store_env.shape[0])
-    ds.createDimension("timesteps", store_env.shape[2])
+    ds.createDimension("member", store_env.shape[2])
+    ds.createDimension("timesteps", store_env.shape[0])
 
     longitude = ds.createVariable("longitude", "f4", ("sites",))
     latitude = ds.createVariable("latitude", "f4", ("sites",))
@@ -117,9 +117,9 @@ def create_env_nc(store_env, lats, longs, site_ids, layer, fn):
         layer,
         "f4",
         (
-            "member",
-            "sites",
             "timesteps",
+            "sites",
+            "member",
         ),
     )
 
