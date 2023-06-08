@@ -12,7 +12,7 @@ from sdmetrics.reports.single_table import QualityReport
 ### --------------------- Use model to generate synthetic covers and sampled synthetic cover ------------------- ###
 
 root_original_file = "Moore_2022-11-17"
-root_site_data_synth = "site_data_synth_19-5-2023_105441.csv"
+root_site_data_synth = "site_data_synth_6-6-2023_144117.csv"
 
 (
     cover_df,
@@ -35,7 +35,7 @@ report.get_details(property_name="Column Shapes")
 report.get_details(property_name="Column Pair Trends")
 
 # evaluate K-S score
-evaluate(synth_sampled, synth_cover)
+evaluate(synth_sampled[synth_sampled.columns[0:5]], synth_cover)
 
 save_csv_plotting(
     cover_df, synth_cover, synth_sampled, root_site_data_synth[10:], "covers"
