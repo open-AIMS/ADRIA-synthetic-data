@@ -208,11 +208,17 @@ def create_timeseries(outcomes, years, layer, label="", color_code="rgba(255, 0,
 
     def lower(y):
         return go.Scatter(
-            y=y, mode="lines", showlegend=False, legendgroup=label, line=no_outline
+            x=years,
+            y=y,
+            mode="lines",
+            showlegend=False,
+            legendgroup=label,
+            line=no_outline,
         )
 
     def upper(y, fillcolor):
         return go.Scatter(
+            x=years,
             y=y,
             mode="none",
             showlegend=False,
@@ -231,30 +237,48 @@ def create_timeseries(outcomes, years, layer, label="", color_code="rgba(255, 0,
         lower(outcomes["lower_25"]),
         upper(outcomes["upper_25"], color_code + "0.40)"),
         go.Scatter(
+            x=years,
             y=outcomes["median"],
             mode="lines",
             fillcolor=color_code + "1)",
             name=str(label),
             line_color=color_code + "1)",
             legendgroup=label,
+            showlegend=False,
         ),
     ]
 
-    go.Figure(fig_data)
-    return fig_data
+    fig = go.Figure(fig_data)
+    fig.update_layout(
+        title=label,
+        xaxis_title="Year",
+        yaxis_title=layer,
+        font=dict(
+            size=18,
+        ),
+    )
+    return fig
 
 
 def comparison_plots_site_data(sample_sites, new_site_data, site_data):
-    fig1 = plot_comparison_scatter(sample_sites, new_site_data, site_data, "area", "k")
+    fig1 = plot_comparison_scatter(sample_sites, new_site_data, site_data)
 
-    fig2 = plot_comparison_hist(sample_sites, new_site_data, site_data, "area")
-    fig3 = plot_comparison_hist(sample_sites, new_site_data, site_data, "k")
-    fig4 = plot_comparison_hist(sample_sites, new_site_data, site_data, "sand")
-    fig5 = plot_comparison_hist(sample_sites, new_site_data, site_data, "rock")
-    fig6 = plot_comparison_hist(sample_sites, new_site_data, site_data, "rubble")
-    fig7 = plot_comparison_hist(sample_sites, new_site_data, site_data, "coral_algae")
-    fig8 = plot_comparison_hist(sample_sites, new_site_data, site_data, "depth_mean")
-    fig9 = plot_comparison_hist(sample_sites, new_site_data, site_data, "zone_type")
+    fig2 = plot_comparison_hist(sample_sites, new_site_data, site_data, "area", "area")
+    fig3 = plot_comparison_hist(sample_sites, new_site_data, site_data, "k", "k")
+    fig4 = plot_comparison_hist(sample_sites, new_site_data, site_data, "sand", "sand")
+    fig5 = plot_comparison_hist(sample_sites, new_site_data, site_data, "rock", "rock")
+    fig6 = plot_comparison_hist(
+        sample_sites, new_site_data, site_data, "rubble", "rubble"
+    )
+    fig7 = plot_comparison_hist(
+        sample_sites, new_site_data, site_data, "coral_algae", "coral algae"
+    )
+    fig8 = plot_comparison_hist(
+        sample_sites, new_site_data, site_data, "depth_mean", "depth mean"
+    )
+    fig9 = plot_comparison_hist(
+        sample_sites, new_site_data, site_data, "zone_type", "zone type"
+    )
 
     return [fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9]
 
