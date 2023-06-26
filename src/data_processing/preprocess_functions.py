@@ -216,7 +216,13 @@ def add_distances_conn_data(conn_data, conn_orig, site_data):
     scaler = MinMaxScaler().fit(conn_data)
     conn_data = scaler.transform(conn_data)
     conn_data = pd.DataFrame(conn_data, columns=cols)
-    return conn_data, scaler
+
+    conn_fields = {
+        kk: {"type": "numerical", "subtype": "float"} for kk in conn_orig.columns
+    }
+    # create metadata dictionary
+    metadata_conn = {"fields": conn_fields, "primary_key": "recieving_site"}
+    return conn_data, scaler, metadata_conn
 
     # lats = site_data.lat
     # longs = site_data.long
