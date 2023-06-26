@@ -176,6 +176,6 @@ def find_NN_conn_data(site_data_synth, conn_samples, conn_orig):
     selected_conn_data = conn_samples_array[selected_site_inds, :]
 
     selected_conn_data = pd.DataFrame(
-        selected_conn_data, columns=site_data_synth["site_id"]
+        selected_conn_data, columns=site_data_synth["reef_siteid"]
     )
     return selected_conn_data

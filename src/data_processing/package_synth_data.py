@@ -106,7 +106,7 @@ def retrieve_synth_env_data_fp(synth_data_fn, layer, rcp):
     return SYNTH_DATA_PACKAGE_DIR + synth_data_fn[0:-4] + file_loc + file_name + ".nc"
 
 
-def retrieve_synth_conn_data_fp(synth_data_fn, year, num):
+def retrieve_synth_conn_data_fp(synth_data_fn):
     return (
         SYNTH_DATA_PACKAGE_DIR
         + synth_data_fn[0:-4]
