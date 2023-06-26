@@ -3,6 +3,9 @@ import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
 
+# import seaborn as sns
+from sklearn.decomposition import PCA
+
 plt.rc("font", size=14)  # controls default text size
 plt.rc("axes", titlesize=12)  # fontsize of the title
 plt.rc("axes", labelsize=12)  # fontsize of the x and y labels
@@ -10,7 +13,7 @@ plt.rc("xtick", labelsize=10)  # fontsize of the x tick labels
 plt.rc("ytick", labelsize=10)  # fontsize of the y tick labels
 
 
-def plot_comparison_scatter(sample_sites, new_site_data, site_data, colour, size):
+def plot_comparison_scatter(sample_sites, new_site_data, site_data):
     """
     Plot scatter plot to compare synthetic and original data.
 
@@ -21,32 +24,79 @@ def plot_comparison_scatter(sample_sites, new_site_data, site_data, colour, size
     :param str size: site data variable to be represented by size (must be float).
     """
     fig, axes = plt.subplots(1, 3)
+    new_size = new_site_data["area"] * (new_site_data["k"] / 100)
+    new_size = new_size / 1000
     axes[0].scatter(
         new_site_data["lat"],
         new_site_data["long"],
-        s=new_site_data[size],
-        c=new_site_data[colour],
+        s=new_size,
+        c=new_size,
     )
+    orig_size = site_data["area"] * (site_data["k"] / 100)
+    orig_size = orig_size / 1000
     axes[1].scatter(
-        site_data["lat"], -site_data["long"], s=site_data[size], c=site_data[colour]
+        site_data["lat"],
+        -site_data["long"],
+        s=orig_size,
+        c=orig_size,
     )
+    sample_size = sample_sites["area"] * (sample_sites["k"] / 100)
+    sample_size = sample_size / 1000
     axes[2].scatter(
         sample_sites["lat"],
         -sample_sites["long"],
-        s=sample_sites[size],
-        c=sample_sites[colour],
+        s=sample_size,
+        c=sample_size,
     )
     axes[1].set_title("Original")
     axes[0].set_title("Synthetic")
     axes[2].set_title("Sampled")
-    axes[1].set(xlabel="lat", ylabel="long")
-    axes[0].set(xlabel="lat", ylabel="long")
-    axes[2].set(xlabel="lat", ylabel="long")
+    axes[1].set(xlabel="latitude")
+    axes[0].set(xlabel="latitude", ylabel="longitude")
+    axes[2].set(xlabel="latitude")
     fig.show()
     return fig
 
 
-def plot_comparison_hist(sample_sites, new_site_data, site_data, parameter):
+def plot_comparison_scatter_covers(
+    cover_orig, site_data, cover_synth, site_data_synth, cover_samp, site_data_samp
+):
+    """
+    Plot scatter plot to compare synthetic and original data.
+
+    :param np.array cover_orig: summed cover for original data.
+    :param dataframe site_data: original site data.
+    :param np.array cover_synth: summed cover for synthetic data.
+    :param dataframe site_data_synth: synthetic site data.
+    :param np.array cover_samp: summed cover for sampled synthetic data.
+    :param dataframe site_data_samp: sampled synthetic site data.
+    """
+    fig, axes = plt.subplots(1, 2)
+
+    orig_size = cover_orig * 1000
+    axes[0].scatter(
+        site_data["lat"],
+        -site_data["long"],
+        s=orig_size,
+        c=orig_size,
+    )
+
+    sample_size = cover_samp * 1000
+    axes[1].scatter(
+        site_data_samp["lat"],
+        -site_data_samp["long"],
+        s=sample_size,
+        c=sample_size,
+    )
+    axes[0].set_title("Original")
+    axes[1].set_title("Sampled")
+    axes[1].set(xlabel="latitude")
+    axes[0].set(xlabel="latitude", ylabel="longitude")
+    fig.show()
+    return fig
+
+
+def plot_comparison_hist(sample_sites, new_site_data, site_data, parameter, label_name):
     """
     Plot histograms to compare synthetic and original data.
 
@@ -80,9 +130,9 @@ def plot_comparison_hist(sample_sites, new_site_data, site_data, parameter):
     axes[1].set_title("Original")
     axes[0].set_title("Synthetic")
     axes[2].set_title("Sampled")
-    axes[1].set(xlabel=parameter, ylabel="p")
-    axes[0].set(xlabel=parameter, ylabel="p")
-    axes[2].set(xlabel=parameter, ylabel="p")
+    axes[1].set(xlabel=label_name, ylabel="p")
+    axes[0].set(xlabel=label_name, ylabel="p")
+    axes[2].set(xlabel=label_name, ylabel="p")
     fig.show()
     return fig
 
