@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import math
+import random
 from sklearn.neighbors import NearestNeighbors
 
 
@@ -109,25 +110,25 @@ def find_NN_dhw_data(site_data_synth, new_data_dhw, nyears):
     """
     synth_lats = site_data_synth["lat"]
     synth_longs = site_data_synth["long"]
-    samples = np.zeros((len(new_data_dhw["Lat"]), 2))
+    synth_site_ids = site_data_synth["site_id"]
+    new_lats = np.unique(new_data_dhw["lat"])
+    new_longs = np.unique(new_data_dhw["lat"])
+
+    samples = np.zeros((len(new_lats), 2))
     site_data_vals = np.zeros((len(synth_lats), 2))
 
-    for l in range(len(new_data_dhw["Lat"])):
-        samples[l][:] = [new_data_dhw["Lat"][l], new_data_dhw["Long"][l]]
+    for l in range(len(new_lats)):
+        samples[l][:] = [new_lats[l], new_longs[l]]
 
-    neigh = NearestNeighbors(n_neighbors=nyears)
+    neigh = NearestNeighbors(n_neighbors=1, metric="haversine")
     neigh.fit(samples)
 
     for k in range(len(synth_lats)):
-        site_data_vals[k][:] = [-synth_lats[k], synth_longs[k]]
+        site_data_vals[k][:] = [synth_lats[k], synth_longs[k]]
 
     nearest_sites = neigh.kneighbors(site_data_vals, return_distance=False)
-    selected_dhws = np.zeros((len(nearest_sites), nyears))
-    for nn in range(len(nearest_sites)):
-        nearest_sites[nn].sort()
-        selected_dhws[nn, :] = new_data_dhw["Dhw"][nearest_sites[nn]]
 
-    return selected_dhws
+    return nearest_sites
 
 
 def find_NN_conn_data(site_data_synth, conn_samples, conn_orig):
@@ -160,7 +161,21 @@ def find_NN_conn_data(site_data_synth, conn_samples, conn_orig):
     selected_conn_data = np.zeros(
         [len(nearest_site_inds), len(nearest_site_inds)], dtype=float
     )
-    conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
-    selected_conn_data = conn_samples_array[nearest_site_inds, :]
 
+    conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
+
+    n_nonz = sum(sum(conn_samples_array) > 0.0)
+    i_nonz = np.where(sum(conn_samples_array) > 0.0)
+    selected_site_inds = np.random.randint(
+        0, conn_samples_array.shape[0] - 1, size=(1, len(synth_lats) - n_nonz)
+    )[0].tolist()
+    for ii in range(n_nonz):
+        selected_site_inds.insert(
+            np.random.randint(0, len(synth_lats) - n_nonz), i_nonz[0][ii]
+        )
+    selected_conn_data = conn_samples_array[selected_site_inds, :]
+
+    selected_conn_data = pd.DataFrame(
+        selected_conn_data, columns=site_data_synth["reef_siteid"]
+    )
     return selected_conn_data

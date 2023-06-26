@@ -194,28 +194,9 @@ def tide_dist(latlong_site1, latlong_site2):
     return d
 
 
-def preprocess_conn_data(site_data, conn_orig):
-    """
-    Preprocesses connectivity data byt appending NS and ES tidal data.
-
-    :param dataframe site_data: original site data.
-    :param dataframe conn_orig: original connectivity data.
-
-    """
+def add_distances_conn_data(conn_data, conn_orig, site_data):
     lats = site_data.lat
     longs = site_data.long
-    ### ----------------Preprocessing data and appending tidal distance matrices------------------###
-    conn_orig.rename(columns={"Unnamed: 0": "recieving_site"}, inplace=True)
-    conn_data = conn_orig
-    rec_sites = conn_orig["recieving_site"]
-
-    conn_data.drop(conn_data.columns[0], axis=1, inplace=True)
-
-    conn_data = pd.DataFrame(conn_data, columns=conn_orig.columns)
-    print(conn_data.isnull().values.any())
-    conn_data.fillna(0)
-    print(conn_data.isnull().values.any())
-
     east_west = np.zeros(conn_data.shape)
     north_south = np.zeros(conn_data.shape)
 
@@ -230,19 +211,33 @@ def preprocess_conn_data(site_data, conn_orig):
     north_south_cols = [n for n in conn_orig.columns + "_NS"]
     north_south = pd.DataFrame(north_south, columns=north_south_cols)
 
-    rec_sites = rec_sites.astype("category").cat.codes
-
     conn_data = pd.concat([conn_data, lats, longs, east_west, north_south], axis=1)
     cols = conn_data.columns
     scaler = MinMaxScaler().fit(conn_data)
     conn_data = scaler.transform(conn_data)
     conn_data = pd.DataFrame(conn_data, columns=cols)
-    conn_data = pd.concat([rec_sites, conn_data], axis=1)
-    conn_data.rename(columns={0: "recieving_site"}, inplace=True)
 
     conn_fields = {
         kk: {"type": "numerical", "subtype": "float"} for kk in conn_orig.columns
     }
     # create metadata dictionary
     metadata_conn = {"fields": conn_fields, "primary_key": "recieving_site"}
-    return conn_data, conn_orig, scaler, metadata_conn
+    return conn_data, scaler, metadata_conn
+
+    # lats = site_data.lat
+    # longs = site_data.long
+    # ### ----------------Preprocessing data and appending tidal distance matrices------------------###
+    # conn_orig.rename(columns={"Unnamed: 0": "recieving_site"}, inplace=True)
+    # conn_data = conn_orig
+    # rec_sites = conn_orig["recieving_site"]
+    # conn_data.drop(conn_data.columns[0], axis=1, inplace=True)
+
+    # count = 0
+    # for lat in range(len(lats)):
+    #     for long in range(len(longs)):
+    #         conn_data_store["lat"][count] = lats[lat]
+    #         conn_data_store["long"][count] = longs[long]
+    #         conn_data_store["conn"][count] = conn_data[conn_data.columns[long]][lat]
+    #         count += 1
+
+    # conn_data = pd.DataFrame(conn_data, columns=conn_orig.columns)

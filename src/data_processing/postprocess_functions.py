@@ -54,14 +54,9 @@ def anonymize_conn(site_data_synth, conn_data_synth):
     :param dataframe conn_data_synth: synthetic connectivity data.
 
     """
-    conn_data_md = {"recieving_site": site_data_synth.site_id.values}
-    columns = [str(sid) for sid in site_data_synth.site_id]
-    for kk in range(len(columns)):
-        conn_data_md[columns[kk]] = conn_data_synth[:, kk]
+    conn_data_synth.insert(0, "recieving_site", site_data_synth.reef_siteid.values)
 
-    conn_data_synth_df = pd.DataFrame(conn_data_md)
-
-    return conn_data_synth_df
+    return conn_data_synth
 
 
 def convert_to_geo(site_data_synth):

@@ -49,7 +49,7 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
 
     synth_sampled["reef_siteid"] = conditions["reef_siteid"]
     array_synth_sampled = make_cover_array(synth_sampled)
-    cover_fn = retrieve_synth_cover_fp(root_site_data_synth[10:-4])
+    cover_fn = retrieve_synth_cover_fp(root_site_data_synth[0:-4])
     create_cover_nc(array_synth_sampled, cover_fn)
 
     return cover_df, synth_cover, synth_sampled, metadata_cover, root_site_data_synth
