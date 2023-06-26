@@ -24,13 +24,17 @@ breakpoint()
 
 ### ------------------------------------Test synthetic data utility-------------------------------------------- ###
 report = QualityReport()
-report.generate(conn_orig, conn_samples[conn_orig.columns][0:216], metadata_conn)
+report.generate(
+    conn_orig[conn_orig.columns[0:216]],
+    conn_samples[conn_orig.columns[0:216]],
+    metadata_conn,
+)
 report.get_details(property_name="Column Shapes")
-report.get_details(property_name="Pair Trends")
+report.get_details(property_name="Column Pair Trends")
 
 save_csv_plotting(
-    conn_orig,
-    conn_samples[conn_orig.columns][0:216],
+    conn_orig[conn_orig.columns[0:216]],
+    conn_samples[conn_orig.columns[0:216]],
     selected_conn_data,
     root_site_data_synth,
     "connectivity",
