@@ -227,3 +227,66 @@ def compared_cover_species_hist(cover_df, synth_cover, synth_sampled):
     )
     plt.xticks(rotation="horizontal")
     plt.show()
+
+
+def plot_pca(real, fake):
+    """
+    Plot the first two components of a PCA of real and fake data.
+    :param fname: If not none, saves the plot with this file name.
+    """
+
+    pca_r = PCA(n_components=4)
+    pca_f = PCA(n_components=4)
+
+    real_t = pca_r.fit_transform(real)
+    fake_t = pca_f.fit_transform(fake)
+
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    fig.suptitle("First 4 components of PCA", fontsize=16)
+    sns.scatterplot(ax=ax[0], x=real_t[:, 0], y=real_t[:, 1])
+    sns.scatterplot(ax=ax[1], x=fake_t[:, 0], y=fake_t[:, 1])
+    ax[0].set_title("Original")
+    ax[1].set_title("Synthetic")
+
+    plt.show()
+
+
+def plot_mean_std(real, fake, ax=None):
+    """
+    Plot the means and standard deviations of each dataset.
+    :param real: DataFrame containing the real data
+    :param fake: DataFrame containing the fake data
+    :param ax: Axis to plot on. If none, a new figure is made.
+    :param fname: If not none, saves the plot with this file name.
+    """
+    if ax is None:
+        fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+        fig.suptitle("Absolute Log Mean and STDs of numeric data\n", fontsize=16)
+
+    ax[0].grid(True)
+    ax[1].grid(True)
+    real = real._get_numeric_data()
+    fake = fake._get_numeric_data()
+    real_mean = np.log(np.add(abs(real.mean()).values, 1e-5))
+    fake_mean = np.log(np.add(abs(fake.mean()).values, 1e-5))
+    min_mean = min(real_mean) - 1
+    max_mean = max(real_mean) + 1
+    line = np.arange(min_mean, max_mean)
+    sns.lineplot(x=line, y=line, ax=ax[0])
+    sns.scatterplot(x=real_mean, y=fake_mean, ax=ax[0])
+    ax[0].set_title("Means of original and synthetic data")
+    ax[0].set_xlabel("Original mean (log)")
+    ax[0].set_ylabel("Synthetic mean (log)")
+
+    real_std = np.log(np.add(real.std().values, 1e-5))
+    fake_std = np.log(np.add(fake.std().values, 1e-5))
+    min_std = min(real_std) - 1
+    max_std = max(real_std) + 1
+    line = np.arange(min_std, max_std)
+    sns.lineplot(x=line, y=line, ax=ax[1])
+    sns.scatterplot(x=real_std, y=fake_std, ax=ax[1])
+    ax[1].set_title("Stds of original data")
+    ax[1].set_xlabel("Original std (log)")
+    ax[1].set_ylabel("Synthetic data std (log)")
+
+    return fig
