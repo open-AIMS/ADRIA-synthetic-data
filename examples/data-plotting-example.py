@@ -8,7 +8,7 @@ import sklearn
 import numpy as np
 import sys
 
-from sdmetrics.reports.single_table import QualityReport
+from sdmetrics.reports.single_table import QualityReport, DiagnosticReport
 from datetime import datetime
 
 sys.path.append("..")
@@ -103,6 +103,13 @@ report.generate(site_data_orig, site_data_synth, metadata_site_data)
 report.get_details(property_name="Column Shapes")
 report.get_details(property_name="Column Pair Trends")
 
+report = DiagnosticReport()
+report.generate(
+    site_data_orig,
+    site_data_synth,
+    metadata_site_data,
+)
+report.get_properties()
 breakpoint()
 
 # cover data plotting
@@ -124,6 +131,13 @@ report = QualityReport()
 report.generate(cover_data_orig, cover_data_synth, metadata_cc)
 report.get_details(property_name="Column Shapes")
 report.get_details(property_name="Column Pair Trends")
+report = DiagnosticReport()
+report.generate(
+    cover_data_orig,
+    cover_data_sampled,
+    metadata_cc,
+)
+report.get_properties()
 
 breakpoint()
 site_ids = np.unique(cover_data_synth["site_id"])
@@ -196,6 +210,14 @@ report.generate(
 report.get_details(property_name="Column Shapes")
 report.get_details(property_name="Column Pair Trends")
 
+report = DiagnosticReport()
+report.generate(
+    dhw_data_orig[dhw_data_orig.columns[[0, 1, 2, 3, 5]]],
+    dhw_data_sampled[dhw_data_orig.columns[[0, 1, 2, 3, 5]]],
+    metadata_dhw,
+)
+report.get_properties()
+
 old_years = np.array([str(year) for year in dhw_data_orig["year"]])
 new_years = np.array([str(year) for year in dhw_data_synth["year"]])
 layer = "dhw"
@@ -245,6 +267,15 @@ report.generate(
 )
 report.get_details(property_name="Column Shapes")
 report.get_details(property_name="Column Pair Trends")
+
+report = DiagnosticReport()
+report.generate(
+    wave_data_orig[wave_data_orig.columns[[0, 1, 2, 3, 5]]],
+    wave_data_synth,
+    metadata_ub,
+)
+report.get_properties()
+
 breakpoint()
 layer = "Ub"
 new_years = np.array([str(year) for year in wave_data_synth["year"]])
