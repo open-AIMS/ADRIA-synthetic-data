@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 
 from src.data_processing.preprocess_functions import (
-    preprocess_conn_data,
     add_distances_conn_data,
 )
 
@@ -31,6 +30,7 @@ def connectivity_model(root_original_file, root_site_data_synth, years, num):
         columns=site_data["reef_siteid"],
     )
 
+    # stack all replicates to be used
     for yr in years:
         for nn in num:
             original_conn_fn = retrieve_orig_conn_fp(root_original_file, yr, nn)
@@ -38,13 +38,12 @@ def connectivity_model(root_original_file, root_site_data_synth, years, num):
             conn_orig.drop(conn_orig.columns[0], axis=1, inplace=True)
             conn_data_store = conn_data_store + conn_orig
 
-    ### ---------------------------------------Train GAN model-------------------------------------------------------###
-    # define the training parameters for the GAN network
-    breakpoint()
+    # add NS and EW tidal distances + lats and longs to training data
     conn_data_store, scaler = add_distances_conn_data(
         conn_data_store, conn_orig, site_data
     )
     data_cols = conn_data_store.columns
+    ### ---------------------------------------Train GAN model-------------------------------------------------------###
 
     # Define the GAN and training parameters
     noise_dim = 32
@@ -84,7 +83,6 @@ def connectivity_model(root_original_file, root_site_data_synth, years, num):
         train=conn_data_store, batch_size=test_size, seed=seed
     )
     real_samples = pd.DataFrame(real, columns=data_cols)
-    breakpoint()
     conn_samples = pd.DataFrame(
         scaler.inverse_transform(real_samples[data_cols]), columns=data_cols
     )
@@ -94,7 +92,7 @@ def connectivity_model(root_original_file, root_site_data_synth, years, num):
     selected_conn_data = find_NN_conn_data(
         site_data_synth, conn_samples, conn_data_store
     )
-    breakpoint()
+
     selected_conn_data = anonymize_conn(site_data_synth, selected_conn_data)
     synth_conn_fn = retrieve_synth_conn_data_fp(root_site_data_synth)
 
