@@ -39,7 +39,7 @@ def connectivity_model(root_original_file, root_site_data_synth, years, num):
             conn_data_store = conn_data_store + conn_orig
 
     # add NS and EW tidal distances + lats and longs to training data
-    conn_data_store, scaler = add_distances_conn_data(
+    conn_data_store, scaler, metadata_conn = add_distances_conn_data(
         conn_data_store, conn_orig, site_data
     )
     data_cols = conn_data_store.columns
@@ -98,4 +98,10 @@ def connectivity_model(root_original_file, root_site_data_synth, years, num):
 
     selected_conn_data.to_csv(synth_conn_fn, index=False)
 
-    return conn_data_store, conn_samples, selected_conn_data, synth_conn_fn
+    return (
+        conn_data_store,
+        conn_samples,
+        selected_conn_data,
+        metadata_conn,
+        synth_conn_fn,
+    )
