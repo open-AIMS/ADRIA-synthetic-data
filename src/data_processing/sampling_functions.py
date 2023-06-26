@@ -161,7 +161,21 @@ def find_NN_conn_data(site_data_synth, conn_samples, conn_orig):
     selected_conn_data = np.zeros(
         [len(nearest_site_inds), len(nearest_site_inds)], dtype=float
     )
-    conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
-    selected_conn_data = conn_samples_array[nearest_site_inds, :]
 
+    conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
+
+    n_nonz = sum(sum(conn_samples_array) > 0.0)
+    i_nonz = np.where(sum(conn_samples_array) > 0.0)
+    selected_site_inds = np.random.randint(
+        0, conn_samples_array.shape[0] - 1, size=(1, len(synth_lats) - n_nonz)
+    )[0].tolist()
+    for ii in range(n_nonz):
+        selected_site_inds.insert(
+            np.random.randint(0, len(synth_lats) - n_nonz), i_nonz[0][ii]
+        )
+    selected_conn_data = conn_samples_array[selected_site_inds, :]
+
+    selected_conn_data = pd.DataFrame(
+        selected_conn_data, columns=site_data_synth["site_id"]
+    )
     return selected_conn_data
