@@ -162,11 +162,21 @@ def get_data_quantiles(env_df, new_data_env, nyears, old_years, new_years, layer
     }
 
     keys = [k for k in outcomes_data.keys()]
-    outcomes_synth = outcomes_data
+    outcomes_synth = {
+        "upper_25": [0.0] * nyears,
+        "lower_25": [0.0] * nyears,
+        "upper_50": [0.0] * nyears,
+        "lower_50": [0.0] * nyears,
+        "upper_75": [0.0] * nyears,
+        "lower_75": [0.0] * nyears,
+        "upper_95": [0.0] * nyears,
+        "lower_95": [0.0] * nyears,
+        "median": [0.0] * nyears,
+    }
+
     quantiles = [97.5, 25, 87.5, 12.5, 75, 25, 62.5, 37.5]
 
     for y in range(nyears):
-        breakpoint()
         data_temp = env_df[layer][old_years == str(y + 2025)]
         synth_data_temp = new_data_env[layer][np.transpose(new_years) == str(y + 2025)]
         data_percentile_temp = np.percentile(data_temp, quantiles)
@@ -182,7 +192,7 @@ def get_data_quantiles(env_df, new_data_env, nyears, old_years, new_years, layer
     return outcomes_data, outcomes_synth
 
 
-def create_timeseries(outcomes, label="", color_code="rgba(255, 0, 0, "):
+def create_timeseries(outcomes, years, layer, label="", color_code="rgba(255, 0, 0, "):
     """Add summarized time series to given figure.
     Parameters
     ----------
