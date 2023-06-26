@@ -43,7 +43,7 @@ def create_synth_site_data_package_fp(time_stamp):
 
 
 def create_synth_site_data_fp(time_stamp):
-    return SYNTH_DATA_DIR + "site_data_" + "synth_" + time_stamp + ".csv"
+    return SYNTH_DATA_DIR + "synth_" + time_stamp + ".csv"
 
 
 def retrieve_synth_site_data_fp(synth_data_fn):
@@ -103,14 +103,15 @@ def retrieve_synth_env_data_fp(synth_data_fn, layer, rcp):
         file_loc = "\\waves\\"
         file_name = "wave_RCP" + rcp
 
-    return SYNTH_DATA_PACKAGE_DIR + synth_data_fn[10:-4] + file_loc + file_name + ".nc"
+    return SYNTH_DATA_PACKAGE_DIR + synth_data_fn[0:-4] + file_loc + file_name + ".nc"
 
 
-def retrieve_synth_conn_data_fp(synth_data_fn):
+def retrieve_synth_conn_data_fp(synth_data_fn, year, num):
     return (
         SYNTH_DATA_PACKAGE_DIR
-        + synth_data_fn[10:-4]
-        + "\\connectivity\\2000\\connectivity.csv"
+        + synth_data_fn[0:-4]
+        + "\\connectivity\\2000\\"
+        + "connecitivty.csv"
     )
 
 
