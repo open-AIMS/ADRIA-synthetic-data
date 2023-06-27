@@ -51,7 +51,7 @@ def connectivity_model(root_original_file, root_site_data_synth, years, num):
     batch_size = 32
 
     log_step = 100
-    epochs = 1000 + 1
+    epochs = 2000 + 1
     learning_rate = 5e-4
     models_dir = "model"
 
