@@ -143,11 +143,11 @@ def find_NN_conn_data(site_data_synth, conn_samples, conn_orig):
 
     synth_lats = site_data_synth["lat"]
     synth_longs = site_data_synth["long"]
-    samples = np.zeros((len(conn_samples.lat), 2))
+    samples = np.zeros((len(conn_samples.lat_from), 2))
     site_data_vals = np.zeros((len(synth_lats), 2))
 
-    for l in range(len(conn_samples.lat)):
-        samples[l][:] = [conn_samples.lat[l], conn_samples.long[l]]
+    for l in range(len(conn_samples.lat_from)):
+        samples[l][:] = [conn_samples.lat_from[l], conn_samples.long_from[l]]
 
     neigh = NearestNeighbors(n_neighbors=1, metric="haversine")
     neigh.fit(samples)
@@ -162,18 +162,22 @@ def find_NN_conn_data(site_data_synth, conn_samples, conn_orig):
         [len(nearest_site_inds), len(nearest_site_inds)], dtype=float
     )
 
-    conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
+    for si in range(len(nearest_site_inds)):
+        for se in range(len(nearest_site_inds)):
+            selected_conn_data[si, se] = conn_samples["conn"][nearest_site_inds[si]]
 
-    n_nonz = sum(sum(conn_samples_array) > 0.0)
-    i_nonz = np.where(sum(conn_samples_array) > 0.0)
-    selected_site_inds = np.random.randint(
-        0, conn_samples_array.shape[0] - 1, size=(1, len(synth_lats) - n_nonz)
-    )[0].tolist()
-    for ii in range(n_nonz):
-        selected_site_inds.insert(
-            np.random.randint(0, len(synth_lats) - n_nonz), i_nonz[0][ii]
-        )
-    selected_conn_data = conn_samples_array[selected_site_inds, :]
+    # conn_samples_array = conn_samples[conn_orig.columns[nearest_site_inds]].to_numpy()
+
+    # n_nonz = sum(sum(conn_samples_array) > 0.0)
+    # i_nonz = np.where(sum(conn_samples_array) > 0.0)
+    # selected_site_inds = np.random.randint(
+    #     0, conn_samples_array.shape[0] - 1, size=(1, len(synth_lats) - n_nonz)
+    # )[0].tolist()
+    # for ii in range(n_nonz):
+    #     selected_site_inds.insert(
+    #         np.random.randint(0, len(synth_lats) - n_nonz), i_nonz[0][ii]
+    #     )
+    # selected_conn_data = conn_samples_array[selected_site_inds, :]
 
     selected_conn_data = pd.DataFrame(
         selected_conn_data, columns=site_data_synth["reef_siteid"]

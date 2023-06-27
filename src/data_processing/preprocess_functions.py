@@ -205,24 +205,46 @@ def add_distances_conn_data(conn_data, conn_orig, site_data):
             east_west[i, j] = tide_dist(longs[i], longs[j])
             north_south[i, j] = tide_dist(lats[i], lats[j])
 
-    east_west_cols = [n for n in conn_orig.columns + "_EW"]
-    east_west = pd.DataFrame(east_west, columns=east_west_cols)
+    # east_west_cols = [n for n in conn_orig.columns + "_EW"]
+    # east_west = pd.DataFrame(east_west, columns=east_west_cols)
 
-    north_south_cols = [n for n in conn_orig.columns + "_NS"]
-    north_south = pd.DataFrame(north_south, columns=north_south_cols)
+    # north_south_cols = [n for n in conn_orig.columns + "_NS"]
+    # north_south = pd.DataFrame(north_south, columns=north_south_cols)
 
-    conn_data = pd.concat([conn_data, lats, longs, east_west, north_south], axis=1)
-    cols = conn_data.columns
-    scaler = MinMaxScaler().fit(conn_data)
-    conn_data = scaler.transform(conn_data)
-    conn_data = pd.DataFrame(conn_data, columns=cols)
+    # conn_data = pd.concat([conn_data, lats, longs, east_west, north_south], axis=1)
+    # cols = conn_data.columns
+    # scaler = MinMaxScaler().fit(conn_data)
+    # conn_data = scaler.transform(conn_data)
+    # conn_data = pd.DataFrame(conn_data, columns=cols)
+
+    store_conn_data = pd.DataFrame(
+        np.zeros((conn_data.shape[0] * conn_data.shape[1], 7)),
+        columns=["lat_to", "long_to", "lat_from", "long_from", "conn", "NS", "EW"],
+    )
+    cols = store_conn_data.columns
+    conn = conn_data.to_numpy()
+    count = 0
+    for conn_in in range(len(site_data.site_id)):
+        for conn_out in range(len(site_data.site_id)):
+            store_conn_data["lat_to"][count] = lats[conn_in]
+            store_conn_data["long_to"][count] = longs[conn_in]
+            store_conn_data["lat_from"][count] = lats[conn_out]
+            store_conn_data["long_from"][count] = longs[conn_out]
+            store_conn_data["conn"][count] = conn[conn_in, conn_out]
+            store_conn_data["NS"][count] = north_south[conn_in, conn_out]
+            store_conn_data["EW"][count] = east_west[conn_in, conn_out]
+            count += 1
 
     conn_fields = {
         kk: {"type": "numerical", "subtype": "float"} for kk in conn_orig.columns
     }
     # create metadata dictionary
     metadata_conn = {"fields": conn_fields, "primary_key": "recieving_site"}
-    return conn_data, scaler, metadata_conn
+    scaler = MinMaxScaler().fit(store_conn_data)
+    store_conn_data = scaler.transform(store_conn_data)
+    store_conn_data = pd.DataFrame(store_conn_data, columns=cols)
+
+    return store_conn_data, scaler, metadata_conn
 
     # lats = site_data.lat
     # longs = site_data.long
