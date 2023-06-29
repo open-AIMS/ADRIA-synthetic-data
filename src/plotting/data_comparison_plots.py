@@ -1,16 +1,11 @@
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
 
-# import seaborn as sns
+import seaborn as sns
 from sklearn.decomposition import PCA
-
-plt.rc("font", size=14)  # controls default text size
-plt.rc("axes", titlesize=12)  # fontsize of the title
-plt.rc("axes", labelsize=12)  # fontsize of the x and y labels
-plt.rc("xtick", labelsize=10)  # fontsize of the x tick labels
-plt.rc("ytick", labelsize=10)  # fontsize of the y tick labels
 
 
 def plot_comparison_scatter(sample_sites, new_site_data, site_data):
@@ -27,71 +22,81 @@ def plot_comparison_scatter(sample_sites, new_site_data, site_data):
     new_size = new_site_data["area"] * (new_site_data["k"] / 100)
     new_size = new_size / 1000
     axes[0].scatter(
-        new_site_data["lat"],
         new_site_data["long"],
+        -new_site_data["lat"],
         s=new_size,
         c=new_size,
     )
     orig_size = site_data["area"] * (site_data["k"] / 100)
     orig_size = orig_size / 1000
     axes[1].scatter(
+        site_data["long"],
         site_data["lat"],
-        -site_data["long"],
         s=orig_size,
         c=orig_size,
     )
     sample_size = sample_sites["area"] * (sample_sites["k"] / 100)
     sample_size = sample_size / 1000
     axes[2].scatter(
+        sample_sites["long"],
         sample_sites["lat"],
-        -sample_sites["long"],
         s=sample_size,
         c=sample_size,
     )
-    axes[1].set_title("Original")
-    axes[0].set_title("Synthetic")
-    axes[2].set_title("Sampled")
-    axes[1].set(xlabel="latitude")
-    axes[0].set(xlabel="latitude", ylabel="longitude")
-    axes[2].set(xlabel="latitude")
+    axes[1].set_title("Original", fontsize=28)
+    axes[0].set_title("Synthetic", fontsize=28)
+    axes[2].set_title("Sampled", fontsize=28)
+    axes[0].set_ylabel("latitude", fontsize=22)
+    for ax_n in range(3):
+        axes[ax_n].set_xlabel("longitude", fontsize=22)
+        axes[ax_n].yaxis.set_tick_params(labelsize=15, rotation=25)
+        axes[ax_n].xaxis.set_tick_params(labelsize=15, rotation=25)
+        axes[ax_n].xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
+        axes[ax_n].yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
+
     fig.show()
     return fig
 
 
-def plot_comparison_scatter_covers(
-    cover_orig, site_data, cover_synth, site_data_synth, cover_samp, site_data_samp
-):
+def plot_comparison_hist_covers(cover_orig, cover_synth, cover_samp):
     """
     Plot scatter plot to compare synthetic and original data.
 
     :param np.array cover_orig: summed cover for original data.
     :param dataframe site_data: original site data.
-    :param np.array cover_synth: summed cover for synthetic data.
-    :param dataframe site_data_synth: synthetic site data.
     :param np.array cover_samp: summed cover for sampled synthetic data.
     :param dataframe site_data_samp: sampled synthetic site data.
     """
-    fig, axes = plt.subplots(1, 2)
+    fig, axes = plt.subplots(1, 3)
 
-    orig_size = cover_orig * 1000
-    axes[0].scatter(
-        site_data["lat"],
-        -site_data["long"],
-        s=orig_size,
-        c=orig_size,
+    axes[0].hist(
+        cover_samp,
+        bins=round(np.sqrt(cover_synth.shape[0])),
+        color="skyblue",
+        lw=0,
+    )
+    axes[1].hist(
+        cover_orig,
+        bins=round(np.sqrt(cover_orig.shape[0])),
+        color="purple",
+        lw=0,
+    )
+    axes[2].hist(
+        cover_samp,
+        bins=round(np.sqrt(cover_samp.shape[0])),
+        color="pink",
+        lw=0,
     )
 
-    sample_size = cover_samp * 1000
-    axes[1].scatter(
-        site_data_samp["lat"],
-        -site_data_samp["long"],
-        s=sample_size,
-        c=sample_size,
-    )
-    axes[0].set_title("Original")
-    axes[1].set_title("Sampled")
-    axes[1].set(xlabel="latitude")
-    axes[0].set(xlabel="latitude", ylabel="longitude")
+    axes[1].set_title("Original", fontsize=28)
+    axes[2].set_title("Sampled", fontsize=28)
+    axes[0].set_title("Synthetic", fontsize=28)
+    axes[0].set_ylabel("Number of sites", fontsize=22)
+    for ax_n in range(3):
+        axes[ax_n].set_xlabel("relative coral cover", fontsize=22)
+        axes[ax_n].yaxis.set_tick_params(labelsize=15, rotation=25)
+        axes[ax_n].xaxis.set_tick_params(labelsize=15, rotation=25)
+
     fig.show()
     return fig
 
@@ -106,33 +111,34 @@ def plot_comparison_hist(sample_sites, new_site_data, site_data, parameter, labe
     :param str parameter: site data variable to be represented as histogram.
     """
     fig, axes = plt.subplots(1, 3)
+
     axes[0].hist(
         new_site_data[parameter],
         bins=round(np.sqrt(new_site_data.shape[0])),
-        density=True,
         color="skyblue",
         lw=0,
     )
     axes[1].hist(
         site_data[parameter],
         bins=round(np.sqrt(site_data.shape[0])),
-        density=True,
         color="purple",
         lw=0,
     )
     axes[2].hist(
         sample_sites[parameter],
         bins=round(np.sqrt(sample_sites.shape[0])),
-        density=True,
         color="pink",
         lw=0,
     )
-    axes[1].set_title("Original")
-    axes[0].set_title("Synthetic")
-    axes[2].set_title("Sampled")
-    axes[1].set(xlabel=label_name, ylabel="p")
-    axes[0].set(xlabel=label_name, ylabel="p")
-    axes[2].set(xlabel=label_name, ylabel="p")
+    axes[1].set_title("Original", fontsize=30)
+    axes[0].set_title("Synthetic", fontsize=30)
+    axes[2].set_title("Sampled", fontsize=30)
+    axes[0].set_ylabel("counts", fontsize=26)
+    for ax_n in range(3):
+        axes[ax_n].set_xlabel(label_name, fontsize=26)
+        axes[ax_n].yaxis.set_tick_params(labelsize=20, rotation=25)
+        axes[ax_n].xaxis.set_tick_params(labelsize=20, rotation=25)
+
     fig.show()
     return fig
 
@@ -253,9 +259,8 @@ def create_timeseries(outcomes, years, layer, label="", color_code="rgba(255, 0,
         title=label,
         xaxis_title="Year",
         yaxis_title=layer,
-        font=dict(
-            size=18,
-        ),
+        xaxis=dict(tickfont_size=28, title=dict(font=dict(size=30))),
+        yaxis=dict(tickfont_size=28, title=dict(font=dict(size=30))),
     )
     return fig
 
@@ -263,8 +268,10 @@ def create_timeseries(outcomes, years, layer, label="", color_code="rgba(255, 0,
 def comparison_plots_site_data(sample_sites, new_site_data, site_data):
     fig1 = plot_comparison_scatter(sample_sites, new_site_data, site_data)
 
-    fig2 = plot_comparison_hist(sample_sites, new_site_data, site_data, "area", "area")
-    fig3 = plot_comparison_hist(sample_sites, new_site_data, site_data, "k", "k")
+    fig2 = plot_comparison_hist(
+        sample_sites, new_site_data, site_data, "area", r"area($m^2$)"
+    )
+    fig3 = plot_comparison_hist(sample_sites, new_site_data, site_data, "k", "k(%)")
     fig4 = plot_comparison_hist(sample_sites, new_site_data, site_data, "sand", "sand")
     fig5 = plot_comparison_hist(sample_sites, new_site_data, site_data, "rock", "rock")
     fig6 = plot_comparison_hist(
@@ -274,7 +281,7 @@ def comparison_plots_site_data(sample_sites, new_site_data, site_data):
         sample_sites, new_site_data, site_data, "coral_algae", "coral algae"
     )
     fig8 = plot_comparison_hist(
-        sample_sites, new_site_data, site_data, "depth_mean", "depth mean"
+        sample_sites, new_site_data, site_data, "depth_mean", "depth mean(m)"
     )
     fig9 = plot_comparison_hist(
         sample_sites, new_site_data, site_data, "zone_type", "zone type"
@@ -307,9 +314,16 @@ def compared_cover_species_hist(cover_df, synth_cover, synth_sampled):
     )
 
     cover_species_df.plot(
-        x="Species", kind="bar", stacked=True, title="Cover for species"
+        x="Species",
+        kind="bar",
+        stacked=True,
+        color=["skyblue", "purple", "pink"],
     )
-    plt.xticks(rotation="horizontal")
+    plt.xticks(rotation="horizontal", fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylabel("p", fontsize=30)
+    plt.xlabel("species", fontsize=30)
+    plt.legend(fontsize=30)
     plt.show()
 
 
@@ -319,14 +333,14 @@ def plot_pca(real, fake):
     :param fname: If not none, saves the plot with this file name.
     """
 
-    pca_r = PCA(n_components=4)
-    pca_f = PCA(n_components=4)
+    pca_r = PCA(n_components=2)
+    pca_f = PCA(n_components=2)
 
     real_t = pca_r.fit_transform(real)
     fake_t = pca_f.fit_transform(fake)
 
     fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-    fig.suptitle("First 4 components of PCA", fontsize=16)
+    fig.suptitle("First 2 components of PCA", fontsize=16)
     sns.scatterplot(ax=ax[0], x=real_t[:, 0], y=real_t[:, 1])
     sns.scatterplot(ax=ax[1], x=fake_t[:, 0], y=fake_t[:, 1])
     ax[0].set_title("Original")
