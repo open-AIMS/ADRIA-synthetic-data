@@ -123,7 +123,6 @@ def preprocess_env_data(env_data, layer, nyears, nsites, nsamples):
             env_df[layer][count : count + nsites] = env_data[layer][rep, :, yr]
             count += nsites
 
-    breakpoint()
     old_years = env_df["year"]
     env_df["year"] = pd.to_datetime(env_df["year"], format="%Y")
 
