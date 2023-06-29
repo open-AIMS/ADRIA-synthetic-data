@@ -1,4 +1,5 @@
 import pandas as pd
+import geopandas as gp
 
 # import geopandas as gpd
 import json
@@ -9,12 +10,14 @@ import numpy as np
 import sys
 
 from sdmetrics.reports.single_table import QualityReport, DiagnosticReport
+from sdmetrics.single_table import NewRowSynthesis
+from sdmetrics.single_column import RangeCoverage, BoundaryAdherence
 from datetime import datetime
 
 sys.path.append("..")
 from src.plotting.data_comparison_plots import (
     comparison_plots_site_data,
-    plot_comparison_scatter_covers,
+    plot_comparison_hist_covers,
     compared_cover_species_hist,
     plot_pca,
     plot_mean_std,
@@ -82,7 +85,14 @@ metadata_ub = {
 
 c_dir = "C:\\Users\\rcrocker\\Documents\\GitHub\\ADRIA-synthetic-data\\synthetic_data\\"
 
+synth_lat_longs = gp.read_file(
+    c_dir
+    + "synthetic_data_packages\\synth_16-6-2023_91140\\site_data\\synth_16-6-2023_91140.gpkg"
+)
+anon_long = synth_lat_longs["geometry"].centroid.x
+anon_lat = synth_lat_longs["geometry"].centroid.y
 
+breakpoint()
 # site data plotting
 site_data_orig = pd.read_csv(
     c_dir + "site_data_orig_plotting_16-6-2023_91140.csv", index_col=False
@@ -94,9 +104,6 @@ site_data_synth = pd.read_csv(
     c_dir + "site_data_synth_plotting_16-6-2023_91140.csv", index_col=False
 )
 
-figs_site_data = comparison_plots_site_data(
-    site_data_sampled, site_data_synth, site_data_orig
-)
 breakpoint()
 report = QualityReport()
 report.generate(site_data_orig, site_data_synth, metadata_site_data)
@@ -111,7 +118,11 @@ report.generate(
 )
 report.get_properties()
 breakpoint()
-
+site_data_sampled["lat"] = anon_lat
+site_data_sampled["long"] = anon_long
+figs_site_data = comparison_plots_site_data(
+    site_data_sampled, site_data_synth, site_data_orig
+)
 # cover data plotting
 cover_data_orig = pd.read_csv(
     c_dir + "covers_orig_plotting_synth_16-6-2023_91140.csv", index_col=False
@@ -126,7 +137,7 @@ cover_data_synth = pd.read_csv(
 figs_cover = compared_cover_species_hist(
     cover_data_orig, cover_data_synth, cover_data_sampled
 )
-
+breakpoint()
 report = QualityReport()
 report.generate(cover_data_orig, cover_data_synth, metadata_cc)
 report.get_details(property_name="Column Shapes")
@@ -134,7 +145,7 @@ report.get_details(property_name="Column Pair Trends")
 report = DiagnosticReport()
 report.generate(
     cover_data_orig,
-    cover_data_sampled,
+    cover_data_synth,
     metadata_cc,
 )
 report.get_properties()
@@ -160,14 +171,12 @@ for k in range(len(site_ids)):
     covers_sum_orig[k] = sum(
         cover_data_orig["cover"][cover_data_orig["site_id"] == site_ids[k]]
     )
-figs_cover_2 = plot_comparison_scatter_covers(
+figs_cover_2 = plot_comparison_hist_covers(
     covers_sum_orig,
-    site_data_orig,
     covers_sum_synth,
-    site_data_synth,
     covers_sum_samp,
-    site_data_sampled,
 )
+
 breakpoint()
 # connectivity data plotting
 conn_data_orig = pd.read_csv(
@@ -184,10 +193,37 @@ conn_data_synth = pd.read_csv(
     dtype=np.float64,
 )
 
+conn_fields = {
+    kk: {"type": "numerical", "subtype": "float"} for kk in conn_data_orig.columns
+}
+# create metadata dictionary
+metadata_conn = {"fields": conn_fields, "primary_key": "recieving_site"}
+
 plot_pca(conn_data_orig, conn_data_synth[conn_data_orig.columns])
 
 fig = plot_mean_std(conn_data_orig, conn_data_synth[conn_data_orig.columns])
 fig.show()
+report = QualityReport()
+report.generate(
+    conn_data_orig,
+    conn_data_synth[conn_data_orig.columns],
+    metadata_conn,
+)
+report.get_details(property_name="Column Shapes")
+report.get_details(property_name="Column Pair Trends")
+breakpoint()
+
+coverage = np.zeros((len(conn_data_orig.columns), 1))
+boundaries = np.zeros((len(conn_data_orig.columns), 1))
+for kk in range(len(coverage)):
+    coverage[kk] = RangeCoverage.compute(
+        real_data=conn_data_orig[conn_data_orig.columns[kk]],
+        synthetic_data=conn_data_synth[conn_data_orig.columns[kk]],
+    )
+    boundaries[kk] = BoundaryAdherence.compute(
+        real_data=conn_data_orig[conn_data_orig.columns[kk]],
+        synthetic_data=conn_data_synth[conn_data_orig.columns[kk]],
+    )
 
 breakpoint()
 # dhw data plotting
