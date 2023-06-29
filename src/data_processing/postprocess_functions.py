@@ -17,11 +17,11 @@ def generate_timestamp():
     """
     ts = dt.now()
     ts_string = (
-        str(ts.day)
+        str(ts.year)
         + "-"
         + str(ts.month)
         + "-"
-        + str(ts.year)
+        + str(ts.day)
         + "_"
         + str(ts.hour)
         + str(ts.minute)
