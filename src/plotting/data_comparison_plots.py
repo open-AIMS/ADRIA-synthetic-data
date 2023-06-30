@@ -333,20 +333,61 @@ def plot_pca(real, fake):
     :param fname: If not none, saves the plot with this file name.
     """
 
-    pca_r = PCA(n_components=2)
-    pca_f = PCA(n_components=2)
+    pca_r = PCA(n_components=5)
+    pca_f = PCA(n_components=5)
 
     real_t = pca_r.fit_transform(real)
     fake_t = pca_f.fit_transform(fake)
 
     fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-    fig.suptitle("First 2 components of PCA", fontsize=16)
+    fig.suptitle("First 5 components of PCA", fontsize=16)
     sns.scatterplot(ax=ax[0], x=real_t[:, 0], y=real_t[:, 1])
     sns.scatterplot(ax=ax[1], x=fake_t[:, 0], y=fake_t[:, 1])
     ax[0].set_title("Original")
+    ax[0].set_xlim(-0.5, 3)
+    ax[0].set_ylim(-1, 2)
     ax[1].set_title("Synthetic")
-
+    ax[1].set_xlim(-0.5, 3)
+    ax[1].set_ylim(-1, 2)
     plt.show()
+
+
+def mean_absolute_percentage_error(y_true: np.ndarray, y_pred: np.ndarray):
+    """
+    Returns the mean absolute percentage error between y_true and y_pred. Throws ValueError if y_true contains zero values.
+
+    :param y_true: NumPy.ndarray with the ground truth values.
+    :param y_pred: NumPy.ndarray with the ground predicted values.
+    :return: Mean absolute percentage error (float).
+    """
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.mean(np.abs((y_true - y_pred) / y_true))
+
+
+def pca_correlation(real, fake):
+    """
+    Calculate the relation between PCA explained variance values.
+
+    :param lingress: whether to use a linear regression, in this case Pearson's.
+    :return: the correlation coefficient if lingress=True, otherwise 1 - MAPE(log(real), log(fake))
+    """
+    pca_r = PCA(n_components=5)
+    pca_f = PCA(n_components=5)
+
+    pca_r.fit(real)
+    pca_f.fit(fake)
+
+    results = pd.DataFrame(
+        {"real": pca_r.explained_variance_, "fake": pca_f.explained_variance_}
+    )
+    print(f"\nTop 5 PCA components:")
+    print(results.to_string())
+
+    pca_error = mean_absolute_percentage_error(
+        pca_r.explained_variance_, pca_f.explained_variance_
+    )
+    breakpoint()
+    return 1 - pca_error
 
 
 def plot_mean_std(real, fake, ax=None):
