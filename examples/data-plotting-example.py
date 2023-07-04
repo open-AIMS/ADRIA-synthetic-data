@@ -19,7 +19,10 @@ from src.plotting.data_comparison_plots import (
     comparison_plots_site_data,
     plot_comparison_hist_covers,
     compared_cover_species_hist,
+    pca_correlation,
     plot_pca,
+    correlation_distance,
+    correlation_heatmap,
     plot_mean_std,
     get_data_quantiles,
     create_timeseries,
@@ -199,10 +202,18 @@ conn_fields = {
 # create metadata dictionary
 metadata_conn = {"fields": conn_fields, "primary_key": "recieving_site"}
 
-plot_pca(conn_data_orig, conn_data_synth[conn_data_orig.columns])
+plot_pca(
+    conn_data_orig,
+    conn_data_synth[conn_data_orig.columns],
+    conn_data_sampled[conn_data_sampled.columns[1:]],
+)
+PCA_mean_error, pca_orig, pca_synth = pca_correlation(
+    conn_data_orig.to_numpy(), conn_data_synth[conn_data_orig.columns].to_numpy()
+)
 
 fig = plot_mean_std(conn_data_orig, conn_data_synth[conn_data_orig.columns])
 fig.show()
+breakpoint()
 report = QualityReport()
 report.generate(
     conn_data_orig,
@@ -211,19 +222,32 @@ report.generate(
 )
 report.get_details(property_name="Column Shapes")
 report.get_details(property_name="Column Pair Trends")
-breakpoint()
 
-coverage = np.zeros((len(conn_data_orig.columns), 1))
-boundaries = np.zeros((len(conn_data_orig.columns), 1))
-for kk in range(len(coverage)):
-    coverage[kk] = RangeCoverage.compute(
-        real_data=conn_data_orig[conn_data_orig.columns[kk]],
-        synthetic_data=conn_data_synth[conn_data_orig.columns[kk]],
-    )
-    boundaries[kk] = BoundaryAdherence.compute(
-        real_data=conn_data_orig[conn_data_orig.columns[kk]],
-        synthetic_data=conn_data_synth[conn_data_orig.columns[kk]],
-    )
+breakpoint()
+corr_orig, corr_synth, corr_samp = correlation_distance(
+    conn_data_orig,
+    conn_data_synth[conn_data_orig.columns],
+    conn_data_sampled[conn_data_sampled.columns[1:]],
+    [],
+)
+
+correlation_heatmap(
+    corr_orig.astype(float).values,
+    corr_synth.astype(float).values,
+    corr_samp.astype(float).values,
+)
+
+# coverage = np.zeros((len(conn_data_orig.columns), 1))
+# boundaries = np.zeros((len(conn_data_orig.columns), 1))
+# for kk in range(len(coverage)):
+#     coverage[kk] = RangeCoverage.compute(
+#         real_data=conn_data_orig[conn_data_orig.columns[kk]],
+#         synthetic_data=conn_data_synth[conn_data_orig.columns[kk]],
+#     )
+#     boundaries[kk] = BoundaryAdherence.compute(
+#         real_data=conn_data_orig[conn_data_orig.columns[kk]],
+#         synthetic_data=conn_data_synth[conn_data_orig.columns[kk]],
+#     )
 
 breakpoint()
 # dhw data plotting
