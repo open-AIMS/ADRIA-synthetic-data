@@ -9,6 +9,8 @@ import sklearn
 import numpy as np
 import sys
 
+from sdv.evaluation.single_table import evaluate_quality, run_diagnostic
+from sdv.metadata import SingleTableMetadata
 from sdmetrics.reports.single_table import QualityReport, DiagnosticReport
 from sdmetrics.single_table import NewRowSynthesis
 from sdmetrics.single_column import RangeCoverage, BoundaryAdherence
@@ -28,37 +30,6 @@ from src.plotting.data_comparison_plots import (
     create_timeseries,
 )
 
-metadata_site_data = {
-    "fields": {
-        "site_id": {"type": "id"},
-        "habitat": {"type": "categorical"},
-        "k": {"type": "numerical", "subtype": "float"},
-        "area": {"type": "numerical", "subtype": "float"},
-        "rubble": {"type": "numerical", "subtype": "float"},
-        "sand": {"type": "numerical", "subtype": "float"},
-        "rock": {"type": "numerical", "subtype": "float"},
-        "coral_algae": {"type": "numerical", "subtype": "float"},
-        "na_proportion": {"type": "numerical", "subtype": "float"},
-        "depth_mean": {"type": "numerical", "subtype": "float"},
-        "depth_sd": {"type": "numerical", "subtype": "float"},
-        "depth_med": {"type": "numerical", "subtype": "float"},
-        "zone_type": {"type": "categorical"},
-        "long": {"type": "numerical", "subtype": "float"},
-        "lat": {"type": "numerical", "subtype": "float"},
-    },
-    "primary_key": "site_id",
-}
-
-metadata_cc = {
-    "fields": {
-        "site_id": {"type": "id"},
-        "species": {"type": "categorical"},
-        "lat": {"type": "numerical", "subtype": "float"},
-        "long": {"type": "numerical", "subtype": "float"},
-        "cover": {"type": "numerical", "subtype": "float"},
-    },
-    "primary_key": "site_id",
-}
 
 metadata_dhw = {
     "columns": {
@@ -87,10 +58,14 @@ metadata_ub = {
 }
 
 c_dir = "C:\\Users\\rcrocker\\Documents\\GitHub\\ADRIA-synthetic-data\\synthetic_data\\"
-
+synth_id = "synth_2023-7-24_152038"
 synth_lat_longs = gp.read_file(
     c_dir
-    + "synthetic_data_packages\\synth_16-6-2023_91140\\site_data\\synth_16-6-2023_91140.gpkg"
+    + "synthetic_data_packages\\"
+    + synth_id
+    + "\\site_data\\"
+    + synth_id
+    + ".gpkg"
 )
 anon_long = synth_lat_longs["geometry"].centroid.x
 anon_lat = synth_lat_longs["geometry"].centroid.y
@@ -98,68 +73,64 @@ anon_lat = synth_lat_longs["geometry"].centroid.y
 breakpoint()
 # site data plotting
 site_data_orig = pd.read_csv(
-    c_dir + "site_data_orig_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "site_data_orig_plotting_" + synth_id + ".csv", index_col=False
 )
 site_data_sampled = pd.read_csv(
-    c_dir + "site_data_samp_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "site_data_samp_plotting_" + synth_id + ".csv", index_col=False
 )
 site_data_synth = pd.read_csv(
-    c_dir + "site_data_synth_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "site_data_synth_plotting_" + synth_id + ".csv", index_col=False
 )
-
 breakpoint()
-report = QualityReport()
-report.generate(site_data_orig, site_data_synth, metadata_site_data)
-report.get_details(property_name="Column Shapes")
-report.get_details(property_name="Column Pair Trends")
-
-report = DiagnosticReport()
-report.generate(
-    site_data_orig,
-    site_data_synth,
-    metadata_site_data,
+metadata_site = SingleTableMetadata()
+metadata_site.detect_from_dataframe(data=site_data_orig)
+quality_report = evaluate_quality(
+    real_data=site_data_orig,
+    synthetic_data=site_data_synth[site_data_orig.columns],
+    metadata=metadata_site,
 )
-report.get_properties()
+diag_report = run_diagnostic(
+    real_data=site_data_orig,
+    synthetic_data=site_data_synth[site_data_orig.columns],
+    metadata=metadata_site,
+)
+
 breakpoint()
 site_data_sampled["lat"] = anon_lat
 site_data_sampled["long"] = anon_long
+site_data_orig["lat"] = -site_data_orig["lat"]
+site_data_synth["lat"] = -site_data_synth["lat"]
 figs_site_data = comparison_plots_site_data(
     site_data_sampled, site_data_synth, site_data_orig
 )
 # cover data plotting
 cover_data_orig = pd.read_csv(
-    c_dir + "covers_orig_plotting_synth_16-6-2023_91140.csv", index_col=False
+    c_dir + "covers_orig_plotting_" + synth_id + ".csv", index_col=False
 )
 cover_data_sampled = pd.read_csv(
-    c_dir + "covers_samp_plotting_synth_16-6-2023_91140.csv", index_col=False
+    c_dir + "covers_samp_plotting_" + synth_id + ".csv", index_col=False
 )
 cover_data_synth = pd.read_csv(
-    c_dir + "covers_synth_plotting_synth_16-6-2023_91140.csv", index_col=False
+    c_dir + "covers_synth_plotting_" + synth_id + ".csv", index_col=False
 )
 
 figs_cover = compared_cover_species_hist(
     cover_data_orig, cover_data_synth, cover_data_sampled
 )
 breakpoint()
-report = QualityReport()
-report.generate(cover_data_orig, cover_data_synth, metadata_cc)
-report.get_details(property_name="Column Shapes")
-report.get_details(property_name="Column Pair Trends")
-report = DiagnosticReport()
-report.generate(
-    cover_data_orig,
-    cover_data_synth,
-    metadata_cc,
+metadata_cc = SingleTableMetadata()
+metadata_cc.detect_from_dataframe(data=cover_data_orig)
+quality_report = evaluate_quality(
+    real_data=cover_data_orig,
+    synthetic_data=cover_data_synth,
+    metadata=metadata_cc,
 )
-report.get_properties()
-
+diag_report = run_diagnostic(
+    real_data=cover_data_orig,
+    synthetic_data=cover_data_synth,
+    metadata=metadata_cc,
+)
 breakpoint()
-site_ids = np.unique(cover_data_synth["site_id"])
-covers_sum_synth = np.zeros(len(site_ids))
-for k in range(len(site_ids)):
-    covers_sum_synth[k] = sum(
-        cover_data_synth["cover"][cover_data_synth["site_id"] == site_ids[k]]
-    )
 
 site_ids = np.unique(cover_data_sampled["reef_siteid"])
 covers_sum_samp = np.zeros(len(site_ids))
@@ -176,7 +147,6 @@ for k in range(len(site_ids)):
     )
 figs_cover_2 = plot_comparison_hist_covers(
     covers_sum_orig,
-    covers_sum_synth,
     covers_sum_samp,
 )
 
