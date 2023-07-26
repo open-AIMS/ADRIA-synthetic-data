@@ -1,9 +1,8 @@
 import pandas as pd
-
-# import geopandas as gp
 import netCDF4
 
-from sdv.tabular import TVAE
+from sdv.single_table import TVAESynthesizer
+from sdv.metadata import SingleTableMetadata
 
 from src.data_processing.preprocess_functions import preprocess_cover_data
 from src.data_processing.package_synth_data import (
@@ -33,8 +32,11 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
     cover_df, metadata_cover = preprocess_cover_data(cover_orig, site_data_orig)
 
     ###----------------------------------Fit and save fastML model for site data-------------------------------------###
-    model = TVAE(primary_key="site_id")
     cover_df["lat"] = -1 * cover_df["lat"]
+    metadata_cover = SingleTableMetadata()
+    metadata_cover.detect_from_dataframe(data=cover_df)
+
+    model = TVAESynthesizer(metadata_cover)
     model.fit(cover_df)
     synth_cover = model.sample(num_rows=N)
 

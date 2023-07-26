@@ -5,7 +5,8 @@ from src.data_processing.preprocess_functions import (
     add_distances_conn_data,
 )
 
-# from sdv.tabular import TVAE
+from sdv.single_table import GaussianCopulaSynthesizer
+from sdv.metadata import SingleTableMetadata
 
 from src.models.GAN_model import GAN
 from src.data_processing.postprocess_functions import anonymize_conn
@@ -19,7 +20,9 @@ from src.data_processing.package_synth_data import (
 
 
 ### -----------------------------Load site data and connectivity data to synethesize----------------------------###
-def connectivity_model(root_original_file, root_site_data_synth, years, num):
+def connectivity_model(
+    root_original_file, root_site_data_synth, years, num, model_type
+):
     synth_data_fn = retrieve_synth_site_data_fp(root_site_data_synth)
     orginal_site_data_fn = retrieve_orig_site_data_fp(root_original_file, ".csv")
     site_data = pd.read_csv(orginal_site_data_fn)
@@ -43,49 +46,59 @@ def connectivity_model(root_original_file, root_site_data_synth, years, num):
         conn_data_store, conn_orig, site_data
     )
     data_cols = conn_data_store.columns
-    ### ---------------------------------------Train GAN model-------------------------------------------------------###
+    ### ---------------------------------------Train model-------------------------------------------------------###
+    if model_type == "GaussianCopula":
+        metadata_conn = SingleTableMetadata()
+        metadata_conn.detect_from_dataframe(data=conn_data_store)
 
-    # Define the GAN and training parameters
-    noise_dim = 32
-    dim = 128
-    batch_size = 32
+        model = GaussianCopulaSynthesizer(
+            metadata_conn,
+            enforce_min_max_values=True,
+            enforce_rounding=False,
+            default_distribution="gaussian_kde",
+        )
+        model.fit(conn_data_store)
 
-    log_step = 100
-    epochs = 1000 + 1
-    learning_rate = 5e-4
-    models_dir = "model"
+        conn_samples = model.sample(num_rows=216)
 
-    gan_args = [batch_size, learning_rate, noise_dim, conn_data_store.shape[1], dim]
-    train_args = ["", epochs, log_step]
+    if model_type == "GAN":
+        # Define the GAN and training parameters
 
-    # run training to learn from data
-    model = GAN
+        noise_dim = 32
+        dim = 128
+        batch_size = 32
 
-    # Training the GAN model
-    synthesizer = model(gan_args)
-    synthesizer.train(conn_data_store, train_args)
-    # synthesizer.save('generator_connectivity')
+        log_step = 100
+        epochs = 1000 + 1
+        learning_rate = 5e-4
+        models_dir = "model"
 
-    # look at generator and discriminator summary
-    # synthesizer.generator.summary()
-    # synthesizer.discriminator.summary()
+        gan_args = [batch_size, learning_rate, noise_dim, conn_data_store.shape[1], dim]
+        train_args = ["", epochs, log_step]
 
-    models = {"GAN": ["GAN", False, synthesizer.generator]}
+        # run training to learn from data
+        model = GAN
 
-    # Setup parameters visualization parameters
-    seed = 17
-    test_size = conn_data_store.shape[0]  # number of sites
-    noise_dim = 32
+        # # Training the GAN model
+        synthesizer = model(gan_args)
+        synthesizer.train(conn_data_store, train_args)
 
-    ### -----------------------------Sample data and transform to original data space--------------------------------###
-    np.random.seed(seed)
-    real = synthesizer.get_data_batch(
-        train=conn_data_store, batch_size=test_size, seed=seed
-    )
-    real_samples = pd.DataFrame(real, columns=data_cols)
-    conn_samples = pd.DataFrame(
-        scaler.inverse_transform(real_samples[data_cols]), columns=data_cols
-    )
+        # # Setup parameters visualization parameters
+        seed = 17
+        test_size = conn_data_store.shape[0]  # number of sites
+        noise_dim = 32
+
+        # ### -----------------------------Sample data and transform to original data space--------------------------------###
+        np.random.seed(seed)
+        real = synthesizer.get_data_batch(
+            train=conn_data_store, batch_size=test_size, seed=seed
+        )
+        real_samples = pd.DataFrame(real, columns=data_cols)
+        conn_samples = pd.DataFrame(
+            scaler.inverse_transform(real_samples[data_cols]), columns=data_cols
+        )
+    else:
+        print("Not a recognised model type.")
 
     ### -------------------------------Select conn data closest to site data spatially-------------------------------###
 
