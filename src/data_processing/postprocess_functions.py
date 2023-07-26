@@ -1,10 +1,11 @@
 import pandas as pd
 
-# import geopandas as gp
-# from shapely.geometry import Point
+import geopandas as gp
+from shapely.geometry import Point
 
 import random as rd
 import numpy as np
+
 import netCDF4 as nc
 
 from datetime import datetime as dt
@@ -69,15 +70,16 @@ def convert_to_geo(site_data_synth):
 
     site_data_synth["geometry"] = list(zip(site_data_synth.long, site_data_synth.lat))
     site_data_synth["geometry"] = site_data_synth["geometry"].apply(Point)
+
     site_data_geo_synth = gp.GeoDataFrame(
-        site_data_synth, geometry="geometry", crs={"init": "epsg:3395"}
+        site_data_synth, geometry="geometry", crs="epsg:3395"
     )
 
     aa = 0
 
     for x, y, r in zip(long, lat, radius):
-        s_temp = gp.GeoSeries([Point(x, y)], crs={"init": "epsg:4326"})
-        s_temp = s_temp.to_crs({"init": "epsg:3395"})
+        s_temp = gp.GeoSeries([Point(x, y)], crs="epsg:4326")
+        s_temp = s_temp.to_crs("epsg:3395")
         site_data_geo_synth["geometry"][aa] = s_temp.buffer(r)[0]
         aa += 1
 
