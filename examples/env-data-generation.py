@@ -19,8 +19,9 @@ from mpl_toolkits.mplot3d import Axes3D
 layer = "Ub"
 rcp = "45"
 root_original_file = "Moore_2022-11-17"
-root_site_data_synth = "synth_16-6-2023_91140.csv"
+root_site_data_synth = "synth_2023-7-24_152038.csv"
 nsamples = 10
+nreplicates = 5
 
 (
     env_df,
@@ -29,7 +30,9 @@ nsamples = 10
     metadata_env,
     nyears,
     old_years,
-) = env_data_model(root_original_file, root_site_data_synth, nsamples, 5, rcp, layer)
+) = env_data_model(
+    root_original_file, root_site_data_synth, nsamples, nreplicates, rcp, layer
+)
 breakpoint()
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
 
