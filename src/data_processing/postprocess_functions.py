@@ -1,13 +1,9 @@
 import pandas as pd
-
 import geopandas as gp
 from shapely.geometry import Point
-
 import random as rd
 import numpy as np
-
 import netCDF4 as nc
-
 from datetime import datetime as dt
 
 
@@ -40,7 +36,7 @@ def anonymize_spatial(site_data_geo_synth):
 
     """
     site_data_geo_synth["geometry"] = site_data_geo_synth.translate(
-        rd.uniform(-1000000, 1000000), rd.uniform(-1000000, 1000000)
+        rd.uniform(-1e10, 1e10), rd.uniform(-1e10, 1e10)
     )
     site_data_geo_synth = site_data_geo_synth.to_crs({"init": "epsg:4326"})
 
