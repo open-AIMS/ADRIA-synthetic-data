@@ -32,7 +32,8 @@ def connectivity_model(
         np.zeros((len(site_data.lat), len(site_data.lat))),
         columns=site_data["reef_siteid"],
     )
-
+    nyears = len(years)
+    nnum = len(num)
     # stack all replicates to be used
     for yr in years:
         for nn in num:
@@ -40,6 +41,8 @@ def connectivity_model(
             conn_orig = pd.read_csv(original_conn_fn, skiprows=3)
             conn_orig.drop(conn_orig.columns[0], axis=1, inplace=True)
             conn_data_store = conn_data_store + conn_orig
+        conn_data_store /= nnum
+    conn_data_store /= nyears
 
     # add NS and EW tidal distances + lats and longs to training data
     conn_data_store, scaler, metadata_conn = add_distances_conn_data(
