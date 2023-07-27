@@ -29,9 +29,4 @@ quality_report = evaluate_quality(
     real_data=cover_df, synthetic_data=synth_cover, metadata=metadata_cover
 )
 
-# report = QualityReport()
-# report.generate(cover_df, synth_cover, metadata_cover)
-# report.get_details(property_name="Column Shapes")
-# report.get_details(property_name="Column Pair Trends")
-
 save_csv_plotting(cover_df, synth_cover, synth_sampled, root_site_data_synth, "covers")

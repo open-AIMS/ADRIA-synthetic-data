@@ -1,8 +1,9 @@
 import pandas as pd
+import geopandas as gp
+from pathlib import Path
 
 from sdv.single_table import GaussianCopulaSynthesizer
 from sdv.metadata import SingleTableMetadata
-
 
 from src.data_processing.preprocess_functions import preprocess_site_data
 from src.data_processing.sampling_functions import sample_rand_radii
@@ -10,6 +11,7 @@ from src.data_processing.postprocess_functions import (
     anonymize_spatial,
     generate_timestamp,
     convert_to_geo,
+    convert_to_csv,
 )
 from src.data_processing.package_synth_data import (
     initialize_data_package,
@@ -23,7 +25,13 @@ def site_data_model(orig_data_package, N, N2, N3):
     ### --------------------------------------Load site data to synethesize--------------------------------------###
 
     site_data_fn = retrieve_orig_site_data_fp(orig_data_package, ".csv")
-    site_data = pd.read_csv(site_data_fn, index_col=False)
+    if site_data_fn.isfile():
+        site_data = pd.read_csv(site_data_fn, index_col=False)
+    else:
+        # convert to csv to use in synthetic data generation models (package clash with connectivity model and geopandas)
+        site_data_geo_fn = retrieve_orig_site_data_fp(orig_data_package, ".gpkg")
+        site_data_geo = gp.read_file(site_data_geo_fn)
+        convert_to_csv(site_data_geo, site_data_geo_fn)
 
     ### ---------------------------------Preprocess data for sdv model fit----------------------------------###
     # simplify to dataframe
