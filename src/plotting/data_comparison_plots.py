@@ -7,6 +7,8 @@ import pandas as pd
 import seaborn as sns
 from sklearn.decomposition import PCA
 
+# from dython.nominal import associations
+
 
 def plot_comparison_scatter(sample_sites, new_site_data, site_data):
     """
@@ -23,7 +25,7 @@ def plot_comparison_scatter(sample_sites, new_site_data, site_data):
     new_size = new_size / 1000
     axes[0].scatter(
         new_site_data["long"],
-        -new_site_data["lat"],
+        new_site_data["lat"],
         s=new_size,
         c=new_size,
     )
@@ -58,44 +60,38 @@ def plot_comparison_scatter(sample_sites, new_site_data, site_data):
     return fig
 
 
-def plot_comparison_hist_covers(cover_orig, cover_synth, cover_samp):
+def plot_comparison_hist_covers(cover_orig, cover_samp):
     """
     Plot scatter plot to compare synthetic and original data.
 
     :param np.array cover_orig: summed cover for original data.
-    :param dataframe site_data: original site data.
     :param np.array cover_samp: summed cover for sampled synthetic data.
-    :param dataframe site_data_samp: sampled synthetic site data.
+
     """
-    fig, axes = plt.subplots(1, 3)
+    fig, axes = plt.subplots(1, 2)
 
     axes[0].hist(
-        cover_samp,
-        bins=round(np.sqrt(cover_synth.shape[0])),
-        color="skyblue",
-        lw=0,
-    )
-    axes[1].hist(
         cover_orig,
         bins=round(np.sqrt(cover_orig.shape[0])),
         color="purple",
         lw=0,
     )
-    axes[2].hist(
+    axes[1].hist(
         cover_samp,
         bins=round(np.sqrt(cover_samp.shape[0])),
         color="pink",
         lw=0,
     )
 
-    axes[1].set_title("Original", fontsize=28)
-    axes[2].set_title("Sampled", fontsize=28)
-    axes[0].set_title("Synthetic", fontsize=28)
+    axes[0].set_title("Original", fontsize=28)
+    axes[1].set_title("Sampled", fontsize=28)
     axes[0].set_ylabel("Number of sites", fontsize=22)
-    for ax_n in range(3):
+    for ax_n in range(2):
         axes[ax_n].set_xlabel("relative coral cover", fontsize=22)
         axes[ax_n].yaxis.set_tick_params(labelsize=15, rotation=25)
         axes[ax_n].xaxis.set_tick_params(labelsize=15, rotation=25)
+        axes[ax_n].yaxis.set_major_formatter(plt.FormatStrFormatter("%.2f"))
+        axes[ax_n].xaxis.set_major_formatter(plt.FormatStrFormatter("%.2f"))
 
     fig.show()
     return fig
@@ -112,32 +108,36 @@ def plot_comparison_hist(sample_sites, new_site_data, site_data, parameter, labe
     """
     fig, axes = plt.subplots(1, 3)
 
-    axes[0].hist(
+    axes[1].hist(
         new_site_data[parameter],
+        density=True,
         bins=round(np.sqrt(new_site_data.shape[0])),
         color="skyblue",
         lw=0,
     )
-    axes[1].hist(
+    axes[0].hist(
         site_data[parameter],
+        density=True,
         bins=round(np.sqrt(site_data.shape[0])),
         color="purple",
         lw=0,
     )
     axes[2].hist(
         sample_sites[parameter],
+        density=True,
         bins=round(np.sqrt(sample_sites.shape[0])),
         color="pink",
         lw=0,
     )
-    axes[1].set_title("Original", fontsize=30)
-    axes[0].set_title("Synthetic", fontsize=30)
+    axes[0].set_title("Original", fontsize=30)
+    axes[1].set_title("Synthetic", fontsize=30)
     axes[2].set_title("Sampled", fontsize=30)
-    axes[0].set_ylabel("counts", fontsize=26)
+    axes[0].set_ylabel("density", fontsize=26)
     for ax_n in range(3):
         axes[ax_n].set_xlabel(label_name, fontsize=26)
         axes[ax_n].yaxis.set_tick_params(labelsize=20, rotation=25)
         axes[ax_n].xaxis.set_tick_params(labelsize=20, rotation=25)
+        axes[ax_n].yaxis.set_major_formatter(plt.FormatStrFormatter("%.2f"))
 
     fig.show()
     return fig
@@ -321,34 +321,59 @@ def compared_cover_species_hist(cover_df, synth_cover, synth_sampled):
     )
     plt.xticks(rotation="horizontal", fontsize=18)
     plt.yticks(fontsize=18)
-    plt.ylabel("p", fontsize=30)
+    plt.ylabel("density", fontsize=30)
     plt.xlabel("species", fontsize=30)
     plt.legend(fontsize=30)
     plt.show()
 
 
-def plot_pca(real, fake):
+def plot_pca(real, fake, samps):
     """
-    Plot the first two components of a PCA of real and fake data.
+    Plot the first 2 components of a PCA of real and fake data.
     :param fname: If not none, saves the plot with this file name.
     """
 
-    pca_r = PCA(n_components=5)
-    pca_f = PCA(n_components=5)
+    pca_r = PCA(n_components=2)
+    pca_f = PCA(n_components=2)
+    pca_s = PCA(n_components=2)
 
     real_t = pca_r.fit_transform(real)
     fake_t = pca_f.fit_transform(fake)
+    samps_t = pca_s.fit_transform(samps)
 
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-    fig.suptitle("First 5 components of PCA", fontsize=16)
-    sns.scatterplot(ax=ax[0], x=real_t[:, 0], y=real_t[:, 1])
-    sns.scatterplot(ax=ax[1], x=fake_t[:, 0], y=fake_t[:, 1])
-    ax[0].set_title("Original")
-    ax[0].set_xlim(-0.5, 3)
-    ax[0].set_ylim(-1, 2)
-    ax[1].set_title("Synthetic")
-    ax[1].set_xlim(-0.5, 3)
-    ax[1].set_ylim(-1, 2)
+    fig, ax = plt.subplots(1, 3, figsize=(18, 6))
+    g1 = sns.scatterplot(ax=ax[0], x=real_t[:, 0], y=real_t[:, 1])
+    g2 = sns.scatterplot(ax=ax[1], x=fake_t[:, 0], y=fake_t[:, 1])
+    g3 = sns.scatterplot(ax=ax[2], x=samps_t[:, 0], y=samps_t[:, 1])
+    ax[0].set_title("Original", size=20)
+    ax[0].set_xlabel("1st component", size=20)
+    ax[0].set_ylabel("2nd component", size=20)
+
+    ax[1].set_title("Synthetic", size=20)
+    ax[2].set_title("Sampled", size=20)
+    ax[1].set_xlabel("1st component", size=20)
+    ax[2].set_xlabel("1st component", size=20)
+    for aa in range(3):
+        ax[aa].set_xlim(-1, 3)
+        ax[aa].set_ylim(-1, 3)
+
+    g1.set_xticklabels(g1.get_xticks(), size=18)
+    g1.set_yticklabels(g1.get_yticks(), size=18)
+    ylabels = ["{:,.1f}".format(x) for x in g1.get_yticks()]
+    g1.set_yticklabels(ylabels)
+    xlabels = ["{:,.1f}".format(x) for x in g1.get_xticks()]
+    g1.set_xticklabels(xlabels)
+
+    g2.set_xticklabels(g2.get_xticks(), size=18)
+    g2.set_yticklabels([])
+    xlabels = ["{:,.1f}".format(x) for x in g2.get_xticks()]
+    g1.set_xticklabels(xlabels)
+
+    g3.set_xticklabels(g3.get_xticks(), size=18)
+    g3.set_yticklabels([])
+    xlabels = ["{:,.1f}".format(x) for x in g3.get_xticks()]
+    g3.set_xticklabels(xlabels)
+
     plt.show()
 
 
@@ -378,7 +403,10 @@ def pca_correlation(real, fake):
     pca_f.fit(fake)
 
     results = pd.DataFrame(
-        {"real": pca_r.explained_variance_, "fake": pca_f.explained_variance_}
+        {
+            "real": pca_r.explained_variance_ratio_,
+            "fake": pca_f.explained_variance_ratio_,
+        }
     )
     print(f"\nTop 5 PCA components:")
     print(results.to_string())
@@ -386,8 +414,8 @@ def pca_correlation(real, fake):
     pca_error = mean_absolute_percentage_error(
         pca_r.explained_variance_, pca_f.explained_variance_
     )
-    breakpoint()
-    return 1 - pca_error
+
+    return 1 - pca_error, pca_r, pca_f
 
 
 def plot_mean_std(real, fake, ax=None):
@@ -429,3 +457,56 @@ def plot_mean_std(real, fake, ax=None):
     ax[1].set_ylabel("Synthetic data std (log)")
 
     return fig
+
+
+def correlation_distance(real, fake, sampled, cat_cols) -> float:
+    """
+    Calculate distance between correlation matrices with certain metric.
+
+    :param how: metric to measure distance. Choose from [``euclidean``, ``mae``, ``rmse``].
+    :return: distance between the association matrices in the chosen evaluation metric. Default: Euclidean
+    """
+
+    real_corr = associations(
+        real, nominal_columns=cat_cols, nom_nom_assoc="theil", compute_only=True
+    )
+    fake_corr = associations(
+        fake, nominal_columns=cat_cols, nom_nom_assoc="theil", compute_only=True
+    )
+    samp_corr = associations(
+        sampled, nominal_columns=cat_cols, nom_nom_assoc="theil", compute_only=True
+    )
+
+    return real_corr["corr"], fake_corr["corr"], samp_corr["corr"]
+
+
+def correlation_heatmap(real_corr, fake_corr, samp_corr):
+    f, (ax1, ax2, ax3, axcb) = plt.subplots(
+        1, 4, gridspec_kw={"width_ratios": [1, 1, 1, 0.08]}
+    )
+    g1 = sns.heatmap(real_corr, cmap="YlGnBu", cbar=False, ax=ax1, vmin=0, vmax=1)
+    g1.set_ylabel("to", size=20)
+    g1.set_xlabel("from", size=20)
+    g1.set_xticks(np.arange(1, real_corr.shape[0], 10))
+    g1.set_yticks(np.arange(1, real_corr.shape[0], 10))
+    g1.set_xticklabels(g1.get_xticks(), size=18)
+    g1.set_yticklabels(g1.get_yticks(), size=18)
+
+    g2 = sns.heatmap(fake_corr, cmap="YlGnBu", cbar=False, ax=ax2, vmin=0, vmax=1)
+    g2.set_ylabel("")
+    g2.set_xlabel("from", size=20)
+    g2.set_yticks([])
+    g2.set_xticks(np.arange(1, real_corr.shape[0], 10))
+    g2.set_yticklabels(g2.get_yticks(), size=18)
+    g2.set_xticklabels(g2.get_xticks(), size=18)
+
+    g3 = sns.heatmap(samp_corr, cmap="YlGnBu", ax=ax3, cbar_ax=axcb, vmin=0, vmax=1)
+    g3.set_ylabel("")
+    g3.set_xlabel("from", size=20)
+    g3.set_yticks(np.arange(1, samp_corr.shape[0], 10))
+    g3.set_xticks(np.arange(1, samp_corr.shape[0], 10))
+    g3.set_yticklabels(g3.get_yticks(), size=18)
+    g3.set_xticklabels(g3.get_xticks(), size=18)
+
+    plt.show()
+    return

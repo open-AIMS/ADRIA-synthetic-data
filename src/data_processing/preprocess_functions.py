@@ -22,28 +22,8 @@ def preprocess_site_data(site_data):
 
     site_data["long"] = abs(site_data["long"])
     site_data["lat"] = abs(site_data["lat"])
-    # define table metadata
-    metadata = {
-        "fields": {
-            "site_id": {"type": "id"},
-            "habitat": {"type": "categorical"},
-            "k": {"type": "numerical", "subtype": "float"},
-            "area": {"type": "numerical", "subtype": "float"},
-            "rubble": {"type": "numerical", "subtype": "float"},
-            "sand": {"type": "numerical", "subtype": "float"},
-            "rock": {"type": "numerical", "subtype": "float"},
-            "coral_algae": {"type": "numerical", "subtype": "float"},
-            "na_proportion": {"type": "numerical", "subtype": "float"},
-            "depth_mean": {"type": "numerical", "subtype": "float"},
-            "depth_sd": {"type": "numerical", "subtype": "float"},
-            "depth_med": {"type": "numerical", "subtype": "float"},
-            "zone_type": {"type": "categorical"},
-            "long": {"type": "numerical", "subtype": "float"},
-            "lat": {"type": "numerical", "subtype": "float"},
-        },
-        "primary_key": "site_id",
-    }
-    return site_data, metadata
+
+    return site_data
 
 
 def convert_to_csv(site_data_geo, csv_fn):
@@ -115,7 +95,9 @@ def preprocess_env_data(env_data, layer, nyears, nsites, nsamples):
     count = 0
     for rep in reps:
         for yr in range(nyears):
-            env_df["year"][count : count + nsites] = years[yr]
+            env_df["year"][count : count + nsites] = pd.to_datetime(
+                str(yr + 2025), format="%Y"
+            )
             env_df["lat"][count : count + nsites] = lats
             env_df["long"][count : count + nsites] = longs
             env_df["site"][count : count + nsites] = sites
@@ -124,7 +106,7 @@ def preprocess_env_data(env_data, layer, nyears, nsites, nsamples):
             count += nsites
 
     old_years = env_df["year"]
-    env_df["year"] = pd.to_datetime(env_df["year"], format="%Y")
+    # env_df["year"] = pd.to_datetime(env_df["year"], format="%Y")
 
     return env_df, old_years, nyears
 
