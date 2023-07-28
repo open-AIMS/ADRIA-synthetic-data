@@ -13,7 +13,7 @@ root_original_file = "Moore_2022-11-17"
 root_site_data_synth = "synth_2023-7-24_152038.csv"
 years = ["2015", "2016", "2017"]  # connectivity data years to use
 num = ["1", "2", "3"]  # connectivity data sample number to use
-model_type = "GAN"  # "GaussianCopula"
+model_type = "GaussianCopula" # "GAN"
 (
     conn_orig,
     conn_samples,
@@ -27,11 +27,7 @@ breakpoint()
 # Beware - there will be a lot of warning messages for the correlation statistic because the connnectivity matrix has so many zeros
 metadata_conn = SingleTableMetadata()
 metadata_conn.detect_from_dataframe(data=conn_orig[conn_orig.columns[0:216]])
-quality_report = evaluate_quality(
-    real_data=conn_orig[conn_orig.columns[0:216]],
-    synthetic_data=conn_samples[conn_orig.columns[0:216]],
-    metadata=metadata_conn,
-)
+quality_report = evaluate_quality(real_data=conn_orig[conn_orig.columns[0:216]],synthetic_data=conn_samples[conn_orig.columns[0:216]],metadata=metadata_conn,)
 
 # Save original, sampled and synthetic as csvs if plotting later (only sampled is saved in data package)
 save_csv_plotting(
