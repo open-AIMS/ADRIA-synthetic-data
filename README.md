@@ -2,7 +2,7 @@
 Repository for the creation of synthetic input data layers for ADRIA.
 
 # Set-up
-In a conda or mamba interpreter (such as miniforge or condaforge), create the environment by running.
+Create the environment by running,
 ```
 conda env create -f ADRIA_synth_data_env.yml
 ```
