@@ -1,13 +1,13 @@
 import pandas as pd
 import numpy as np
-
-from src.data_processing.preprocess_functions import (
-    add_distances_conn_data,
-)
+from sklearn.preprocessing import MinMaxScaler
 
 from sdv.single_table import GaussianCopulaSynthesizer
 from sdv.metadata import SingleTableMetadata
 
+from src.data_processing.preprocess_functions import (
+    add_distances_conn_data,
+)
 from src.models.GAN_model import GAN
 from src.data_processing.postprocess_functions import anonymize_conn
 from src.data_processing.sampling_functions import find_NN_conn_data
@@ -45,7 +45,7 @@ def connectivity_model(
     conn_data_store /= nyears
 
     # add NS and EW tidal distances + lats and longs to training data
-    conn_data_store, scaler, metadata_conn = add_distances_conn_data(
+    conn_data_store, metadata_conn = add_distances_conn_data(
         conn_data_store, conn_orig, site_data
     )
     data_cols = conn_data_store.columns
@@ -65,6 +65,10 @@ def connectivity_model(
         conn_samples = model.sample(num_rows=216)
 
     if model_type == "GAN":
+        scaler = MinMaxScaler().fit(conn_data_store)
+        conn_data_store = scaler.transform(conn_data_store)
+        conn_data_store = pd.DataFrame(conn_data_store, columns=data_cols)
+
         # Define the GAN and training parameters
 
         noise_dim = 32

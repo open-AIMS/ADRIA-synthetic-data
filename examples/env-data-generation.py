@@ -5,7 +5,10 @@ sys.path.append("..")
 
 from src.plotting.data_comparison_plots import create_timeseries, get_data_quantiles
 from src.data_processing.package_synth_data import save_csv_plotting
-from src.models.env_PAR_model import env_data_model
+
+# from src.models.env_PAR_model import env_data_model
+
+from src.models.env_PAR_model_fast import env_data_model_fast
 
 from sdmetrics.reports.single_table import QualityReport
 
@@ -23,6 +26,17 @@ root_site_data_synth = "synth_2023-7-24_152038.csv"
 nsamples = 10
 nreplicates = 5
 
+# (
+#     env_df,
+#     new_data_env,
+#     selected_env_data,
+#     metadata_env,
+#     nyears,
+#     old_years,
+# ) = env_data_model(
+#     root_original_file, root_site_data_synth, nsamples, nreplicates, rcp, layer
+# )
+
 (
     env_df,
     new_data_env,
@@ -30,9 +44,7 @@ nreplicates = 5
     metadata_env,
     nyears,
     old_years,
-) = env_data_model(
-    root_original_file, root_site_data_synth, nsamples, nreplicates, rcp, layer
-)
+) = env_data_model_fast(root_original_file, root_site_data_synth, 10, rcp, layer)
 breakpoint()
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
 

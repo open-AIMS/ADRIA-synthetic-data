@@ -42,7 +42,7 @@ def env_data_model(
     for rep in np.unique(env_df["rep"]):
         temp_env_df = env_df[env_df["rep"] == rep]
         model = PARModel(epochs=1024, cuda=False)
-
+        breakpoint()
         model.fit(
             data=temp_env_df.loc[:, temp_env_df.columns != "rep"],
             context_columns=["lat", "long"],

@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+import random
 
 
 def preprocess_site_data(site_data):
@@ -111,6 +111,43 @@ def preprocess_env_data(env_data, layer, nyears, nsites, nsamples):
     return env_df, old_years, nyears
 
 
+def preprocess_env_data_fast(env_data, layer, nyears, nsites, nsamples):
+    size = nyears * nsites * nsamples
+
+    lats = env_data["latitude"][:]
+    longs = env_data["longitude"][:]
+    sites = np.array(range(1, nsites + 1))
+
+    env_df = pd.DataFrame(
+        {
+            "year": [0] * size,
+            "lat": [0.0] * size,
+            "long": [0.0] * size,
+            "site": [0] * size,
+            layer: [0.0] * size,
+        }
+    )
+
+    count = 0
+
+    for rep in range(nsamples):
+        samp_temp = random.randint(0, nsamples - 1)
+        for yr in range(nyears):
+            env_df["year"][count : count + nsites] = pd.to_datetime(
+                str(yr + 2025), format="%Y"
+            )
+            env_df["lat"][count : count + nsites] = lats
+            env_df["long"][count : count + nsites] = longs
+            env_df["site"][count : count + nsites] = sites
+            env_df[layer][count : count + nsites] = env_data[layer][samp_temp, :, yr]
+            count += nsites
+
+    old_years = env_df["year"]
+    # env_df["year"] = pd.to_datetime(env_df["year"], format="%Y")
+
+    return env_df, old_years, nyears
+
+
 def preprocess_cover_data(cc_data, site_data):
     """
     Preprocesses coral cover into correct form for tabular model.
@@ -193,17 +230,13 @@ def add_distances_conn_data(conn_data, conn_orig, site_data):
     north_south = pd.DataFrame(north_south, columns=north_south_cols)
 
     conn_data = pd.concat([conn_data, lats, longs, east_west, north_south], axis=1)
-    cols = conn_data.columns
-    scaler = MinMaxScaler().fit(conn_data)
-    conn_data = scaler.transform(conn_data)
-    conn_data = pd.DataFrame(conn_data, columns=cols)
 
     conn_fields = {
         kk: {"type": "numerical", "subtype": "float"} for kk in conn_orig.columns
     }
     # create metadata dictionary
     metadata_conn = {"fields": conn_fields, "primary_key": "recieving_site"}
-    return conn_data, scaler, metadata_conn
+    return conn_data, metadata_conn
 
     # lats = site_data.lat
     # longs = site_data.long
