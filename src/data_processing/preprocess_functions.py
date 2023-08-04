@@ -72,10 +72,9 @@ def initialize_env_data(layer):
     return data_types, metadata_env
 
 
-def preprocess_env_data(env_data, layer, nyears, nsites, nsamples):
-    size = nyears * nsites * nsamples
+def preprocess_env_data(env_data, layer, nyears, nsites, replicates):
+    size = nyears * nsites * len(replicates)
 
-    reps = np.array(range(nsamples))
     lats = env_data["latitude"][:]
     longs = env_data["longitude"][:]
     years = np.array([str(yr + 2025) for yr in range(nyears)])
@@ -93,7 +92,7 @@ def preprocess_env_data(env_data, layer, nyears, nsites, nsamples):
     )
 
     count = 0
-    for rep in reps:
+    for rep in replicates:
         for yr in range(nyears):
             env_df["year"][count : count + nsites] = pd.to_datetime(
                 str(yr + 2025), format="%Y"
@@ -102,7 +101,7 @@ def preprocess_env_data(env_data, layer, nyears, nsites, nsamples):
             env_df["long"][count : count + nsites] = longs
             env_df["site"][count : count + nsites] = sites
             env_df["rep"][count : count + nsites] = rep
-            env_df[layer][count : count + nsites] = env_data[layer][rep, :, yr]
+            env_df[layer][count : count + nsites] = env_data[layer][rep - 1, :, yr]
             count += nsites
 
     old_years = env_df["year"]
