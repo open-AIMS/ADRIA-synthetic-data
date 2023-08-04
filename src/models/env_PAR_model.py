@@ -19,7 +19,7 @@ from src.data_processing.package_synth_data import (
 
 ### ----------------------------------Load site data and env data to synethesize----------------------------------###
 def env_data_model(
-    root_original_file, root_site_data_synth, nsamples, reps, rcp, layer
+    root_original_file, root_site_data_synth, nsamples, replicates, rcp, layer
 ):
     original_data_fn = retrieve_orig_env_fp(root_original_file, rcp, layer)
     synth_data_fn = retrieve_synth_site_data_fp(root_site_data_synth)
@@ -30,16 +30,16 @@ def env_data_model(
     ### --------------------------------------Reshape data to fit PAR model------------------------------------------###
     data_types, metadata_env = initialize_env_data(layer)
     nreps, nsites, nyears = ENV[layer].shape
-
+    reps = len(replicates)
     store_env_synth = np.zeros([nyears, len(site_data_synth.site_id), nsamples * reps])
 
     env_df, old_years, nyears = preprocess_env_data(
-        ENV, layer, nyears, nsites, nsamples
+        ENV, layer, nyears, nsites, replicates
     )
 
     total_reps = 0
     ### ----------------------------------------Set up and fit PAR model---------------------------------------------###
-    for rep in np.unique(env_df["rep"]):
+    for rep in replicates:
         temp_env_df = env_df[env_df["rep"] == rep]
         model = PARModel(epochs=1024, cuda=False)
 
@@ -58,7 +58,7 @@ def env_data_model(
         new_years = new_years * N_s
         new_data_env["year"] = new_years
 
-        for rr in range(reps):
+        for rr in range(nsamples):
             ### -------------------------Sample synthetic env data at synthetic site data locations --------------------------###
             lat = site_data_synth.lat.values
             long = site_data_synth.long.values
