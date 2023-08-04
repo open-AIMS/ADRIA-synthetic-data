@@ -21,7 +21,7 @@ rcp = "45"
 root_original_file = "Moore_2022-11-17"
 root_site_data_synth = "synth_2023-7-24_152038.csv"
 nsamples = 10
-nreplicates = 5
+replicates = [10, 25, 30, 42, 50]
 
 (
     env_df,
@@ -31,7 +31,7 @@ nreplicates = 5
     nyears,
     old_years,
 ) = env_data_model(
-    root_original_file, root_site_data_synth, nsamples, nreplicates, rcp, layer
+    root_original_file, root_site_data_synth, nsamples, replicates, rcp, layer
 )
 breakpoint()
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
