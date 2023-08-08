@@ -21,7 +21,8 @@ rcp = "45"
 root_original_file = "Moore_2022-11-17"
 root_site_data_synth = "synth_2023-7-24_152038.csv"
 nsamples = 10
-replicates = [10, 25, 30, 42, 50]
+# replicates = [10, 38, 41, 42, 45]  # dhw
+replicates = [1, 5, 13, 16, 45]  # waves
 
 (
     env_df,
@@ -51,12 +52,12 @@ quality_report = evaluate_quality(
 
 
 ### ------------------------------------------ Plot data as timeseries ----------------------------------------- ###
-new_years = [str(yr) for yr in new_data_env["year"]]
-outcomes_data, outcomes_synth = get_data_quantiles(
-    env_df, new_data_env, nyears, old_years, new_years, layer
-)
 
-fig_data = create_timeseries(outcomes_data, label="Original " + layer + " Data")
+outcomes_data, outcomes_synth = get_data_quantiles(env_df, new_data_env, nyears, layer)
+breakpoint()
+fig_data = create_timeseries(
+    outcomes_data, old_years, layer, label="Original " + layer + " Data"
+)
 go.Figure(fig_data).show()
 
 fig_synth = create_timeseries(outcomes_synth, label="Synthetic " + layer + " Data")
