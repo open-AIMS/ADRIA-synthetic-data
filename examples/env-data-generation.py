@@ -7,8 +7,8 @@ from src.plotting.data_comparison_plots import create_timeseries, get_data_quant
 from src.data_processing.package_synth_data import save_csv_plotting
 from src.models.env_PAR_model import env_data_model
 
-from sdmetrics.reports.single_table import QualityReport
-
+from sdv.evaluation.single_table import evaluate_quality
+from sdv.metadata import SingleTableMetadata
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -21,7 +21,8 @@ rcp = "45"
 root_original_file = "Moore_2022-11-17"
 root_site_data_synth = "synth_2023-7-24_152038.csv"
 nsamples = 10
-nreplicates = 5
+# replicates = [10, 38, 41, 42, 45]  # dhw
+replicates = [1, 5, 13, 16, 45]  # waves
 
 (
     env_df,
@@ -31,7 +32,7 @@ nreplicates = 5
     nyears,
     old_years,
 ) = env_data_model(
-    root_original_file, root_site_data_synth, nsamples, nreplicates, rcp, layer
+    root_original_file, root_site_data_synth, nsamples, replicates, rcp, layer
 )
 breakpoint()
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
@@ -40,21 +41,23 @@ breakpoint()
 # # report values should be high
 env_df["year"] = [yr.year for yr in env_df.year]
 new_data_env["year"] = [int(yr) for yr in new_data_env.year]
-report = QualityReport()
-report.generate(
-    env_df[env_df.columns[[0, 1, 2, 3, 5]]],
-    new_data_env,
-    metadata_env,
+
+metadata_env = SingleTableMetadata()
+metadata_env.detect_from_dataframe(data=env_df[env_df.columns[[0, 1, 2, 3, 5]]])
+quality_report = evaluate_quality(
+    real_data=env_df[env_df.columns[[0, 1, 2, 3, 5]]],
+    synthetic_data=new_data_env,
+    metadata=metadata_env,
 )
-report.get_details(property_name="Column Shapes")
+
 
 ### ------------------------------------------ Plot data as timeseries ----------------------------------------- ###
-new_years = [str(yr) for yr in new_data_env["year"]]
-outcomes_data, outcomes_synth = get_data_quantiles(
-    env_df, new_data_env, nyears, old_years, new_years, layer
-)
 
-fig_data = create_timeseries(outcomes_data, label="Original " + layer + " Data")
+outcomes_data, outcomes_synth = get_data_quantiles(env_df, new_data_env, nyears, layer)
+breakpoint()
+fig_data = create_timeseries(
+    outcomes_data, old_years, layer, label="Original " + layer + " Data"
+)
 go.Figure(fig_data).show()
 
 fig_synth = create_timeseries(outcomes_synth, label="Synthetic " + layer + " Data")

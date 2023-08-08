@@ -310,7 +310,7 @@ breakpoint()
 layer = "Ub"
 new_years = np.array([str(year) for year in wave_data_synth["year"]])
 outcomes_data, outcomes_synth = get_data_quantiles(
-    wave_data_orig, wave_data_synth, 75, old_years, new_years, layer
+    wave_data_orig, wave_data_synth, 75, layer
 )
 fig_data = create_timeseries(
     outcomes_data, np.unique(old_years), layer, label="Original " + layer + " Data"
@@ -326,7 +326,7 @@ go.Figure(fig_synth).show()
 breakpoint()
 new_years_samps = np.array([str(int(year)) for year in wave_data_sampled["year"]])
 outcomes_data, outcomes_synth_selected = get_data_quantiles(
-    wave_data_orig, wave_data_sampled, 75, old_years, new_years_samps, layer
+    wave_data_orig, wave_data_sampled, 75, layer
 )
 
 fig_synth_sel = create_timeseries(
