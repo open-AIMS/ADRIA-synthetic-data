@@ -143,7 +143,7 @@ def plot_comparison_hist(sample_sites, new_site_data, site_data, parameter, labe
     return fig
 
 
-def get_data_quantiles(env_df, new_data_env, nyears, old_years, new_years, layer):
+def get_data_quantiles(env_df, new_data_env, nyears, layer):
     """
     Plot environmental data as time series of quantiles.
 
@@ -179,7 +179,8 @@ def get_data_quantiles(env_df, new_data_env, nyears, old_years, new_years, layer
         "lower_95": [0.0] * nyears,
         "median": [0.0] * nyears,
     }
-
+    old_years = np.array([str(year) for year in env_df["year"]])
+    new_years = np.array([str(year) for year in new_data_env["year"]])
     quantiles = [97.5, 25, 87.5, 12.5, 75, 25, 62.5, 37.5]
 
     for y in range(nyears):
