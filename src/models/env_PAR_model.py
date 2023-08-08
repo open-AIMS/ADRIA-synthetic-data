@@ -54,6 +54,7 @@ def env_data_model(
         ### -----------------------------------------Sample data to synthesize--------------------------------------------###
         N_s = 100
         new_data_env = model.sample(N_s)
+        new_data_env[new_data_env[layer] < 0.0] = 0.0
         new_years = [str(yr + 2025) for yr in range(nyears)]
         new_years = new_years * N_s
         new_data_env["year"] = new_years
@@ -91,7 +92,7 @@ def env_data_model(
     longs = site_data_synth["long"]
     sites = [int(si) for si in range(1, nsites + 1)]
     count = 0
-
+    store_env_synth[store_env_synth < 0] = 0
     for rep in range(reps * nsamples):
         for yr in range(nyears):
             synth_selected_df["lat"][count : count + nsites] = lats
