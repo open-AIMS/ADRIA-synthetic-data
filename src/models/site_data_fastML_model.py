@@ -5,13 +5,15 @@ from pathlib import Path
 from sdv.single_table import GaussianCopulaSynthesizer
 from sdv.metadata import SingleTableMetadata
 
-from src.data_processing.preprocess_functions import preprocess_site_data
+from src.data_processing.preprocess_functions import (
+    preprocess_site_data,
+    convert_to_csv,
+)
 from src.data_processing.sampling_functions import sample_rand_radii
 from src.data_processing.postprocess_functions import (
     anonymize_spatial,
     generate_timestamp,
     convert_to_geo,
-    convert_to_csv,
 )
 from src.data_processing.package_synth_data import (
     initialize_data_package,
