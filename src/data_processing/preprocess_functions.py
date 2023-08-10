@@ -39,6 +39,8 @@ def convert_to_csv(site_data_geo, csv_fn):
     site_data["lat"] = site_data_geo.centroid.y
     site_data.to_csv(csv_fn[:-4] + "csv", index=False)
 
+    return site_data
+
 
 def initialize_env_data(layer):
     """
