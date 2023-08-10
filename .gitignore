@@ -1,5 +1,5 @@
 .vscode/
 /synthetic_data/*
-**/_pycache_
+**/__pycache__
 /src/models/model/*.h5
 /original_data/*
