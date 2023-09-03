@@ -33,6 +33,8 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
     cover_df["lat"] = -1 * cover_df["lat"]
     metadata_cover = SingleTableMetadata()
     metadata_cover.detect_from_dataframe(data=cover_df)
+    metadata_cover.update_column(column_name="species", sdtype="categorical")
+    metadata_cover.update_column(column_name="site_id", sdtype="categorical")
 
     model = TVAESynthesizer(metadata_cover)
     model.fit(cover_df)
@@ -44,7 +46,7 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
     )
 
     synth_sampled = model.sample_remaining_columns(
-        conditions[["species", "lat", "long"]], max_tries_per_batch=600
+        conditions[["species", "lat", "long"]], max_tries_per_batch=2000
     )
 
     synth_sampled["reef_siteid"] = conditions["reef_siteid"]
