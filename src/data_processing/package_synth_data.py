@@ -123,6 +123,10 @@ def create_dp_jason(orig_data_package_path, synth_data_package_name):
     data["title"] = "Synthetic data package"  # <--- add `id` value.
     data["description"] = "Data package synthesised from actual data package for ADRIA."
     data["resources"][0]["path"] = "site_data\\" + synth_data_package_name + ".gpkg"
+    data["resources"][1]["description"] = "Initial coral cover."
+    data["resources"][2]["description"] = "Stochastic degree heating week data."
+    data["resources"][3]["description"] = "Stochastic wave data."
+    data["resources"][4]["description"] = "Connectivity data."
     data["contributors"] = []
     synth_data_package_path = retrieve_synth_data_package_path(synth_data_package_name)
 
