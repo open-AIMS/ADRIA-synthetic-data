@@ -15,7 +15,7 @@ from src.data_processing.package_synth_data import (
     retrieve_orig_data_package_path,
 )
 
-orig_data_package = "Moore_2022-11-17"
+orig_data_package = "Moore_2023-08-17"
 
 ### --------------------------------------- Create synthetic site data ----------------------------------------- ###
 
@@ -27,22 +27,12 @@ orig_data_package = "Moore_2022-11-17"
     synth_site_data_fn,
 ) = site_data_model(orig_data_package, 300, 30, 10)
 
-quality_report = evaluate_quality(
-    real_data=site_data, synthetic_data=sample_sites, metadata=metadata_site
-)
 
 ### ------------------------------------- Create synthetic coral covers ---------------------------------------- ###
-
-(
-    cover_df,
-    synth_cover,
-    synth_sampled,
-    metadata_cover,
-    root_site_data_synth,
-) = coral_cover_model(orig_data_package, synth_site_data_fn, 300)
-
-quality_report = evaluate_quality(
-    real_data=cover_df, synthetic_data=synth_cover, metadata=metadata_cover
+breakpoint()
+synth_fn = synth_site_data_fn.split("\\")[-1][:-5] + ".csv"
+(cover_df, synth_cover, synth_sampled, metadata_cover, synth_fn) = coral_cover_model(
+    orig_data_package, synth_fn, 300
 )
 
 ### ----------------------------------- Create synthetic environmental layers ---------------------------------- ###
@@ -50,6 +40,9 @@ quality_report = evaluate_quality(
 layer1 = "dhw"
 layer2 = "Ub"
 rcp = "45"
+samples = 10
+replicates_dhw = [10, 38, 41, 42, 45]
+replicates_waves = [1, 5, 13, 16, 45]
 
 (
     dhw_df,
@@ -58,7 +51,7 @@ rcp = "45"
     metadata_dhw,
     nyears,
     old_years,
-) = env_data_model(orig_data_package, synth_site_data_fn, rcp, layer1)
+) = env_data_model(orig_data_package, synth_fn, samples, replicates_dhw, rcp, layer1)
 
 (
     wave_df,
@@ -67,7 +60,7 @@ rcp = "45"
     metadata_wave,
     nyears,
     old_years,
-) = env_data_model(orig_data_package, synth_site_data_fn, rcp, layer2)
+) = env_data_model(orig_data_package, synth_fn, samples, replicates_waves, rcp, layer2)
 
 ### ----------------------------------- Create synthetic connectivity layers ---------------------------------- ###
 years = ["2015", "2016", "2017"]  # connectivity data years to use
@@ -79,17 +72,10 @@ model_type = "GAN"  # "GaussianCopula"
     selected_conn_data,
     metadata_conn,
     synth_conn_fn,
-) = connectivity_model(orig_data_package, synth_site_data_fn, years, num, model_type)
+) = connectivity_model(orig_data_package, synth_fn, years, num, model_type)
 
-metadata_conn = SingleTableMetadata()
-metadata_conn.detect_from_dataframe(data=conn_orig[conn_orig.columns[0:216]])
-quality_report = evaluate_quality(
-    real_data=conn_orig[conn_orig.columns[0:216]],
-    synthetic_data=conn_samples[conn_orig.columns[0:216]],
-    metadata=metadata_conn,
-)
 
 ### ----------------------------------------- Add json to data package ----------------------------------------- ###
 
 orig_data_package_path = retrieve_orig_data_package_path(orig_data_package)
-create_dp_jason(orig_data_package_path, synth_site_data_fn)
+create_dp_jason(orig_data_package_path, synth_fn[:-4])
