@@ -79,6 +79,7 @@ def convert_to_geo(site_data_synth):
         site_data_geo_synth["geometry"][aa] = s_temp.buffer(r)[0]
         aa += 1
 
+    site_data_geo_synth = site_data_geo_synth.to_crs("epsg:4326")
     site_data_geo_synth = site_data_geo_synth.drop(["lat", "long"], axis="columns")
 
     return site_data_geo_synth
