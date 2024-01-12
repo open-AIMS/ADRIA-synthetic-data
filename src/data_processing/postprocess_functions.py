@@ -70,6 +70,7 @@ def convert_to_geo(site_data_synth):
     site_data_geo_synth = gp.GeoDataFrame(
         site_data_synth, geometry="geometry", crs="epsg:3395"
     )
+    site_data_geo_synth = site_data_geo_synth.set_crs("epsg:3395", allow_override=True)
 
     aa = 0
 
@@ -79,8 +80,8 @@ def convert_to_geo(site_data_synth):
         site_data_geo_synth["geometry"][aa] = s_temp.buffer(r)[0]
         aa += 1
 
-    site_data_geo_synth = site_data_geo_synth.to_crs("epsg:4326")
     site_data_geo_synth = site_data_geo_synth.drop(["lat", "long"], axis="columns")
+    site_data_geo_synth = site_data_geo_synth.to_crs("epsg:4326")
 
     return site_data_geo_synth
 
