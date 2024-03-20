@@ -3,6 +3,8 @@ import geopandas as gp
 from shapely.geometry import Point
 import random as rd
 import numpy as np
+import copy
+from scipy.stats import lognorm
 import netCDF4 as nc
 from datetime import datetime as dt
 
@@ -137,10 +139,14 @@ def make_cover_array(cover_df):
 
     sites = cover_df["reef_siteid"].unique()
     species = cover_df["species"].unique()
-    store_cover = np.zeros((len(sites), len(species)))
-    for si in range(len(sites)):
-        store_cover[si, :] = cover_df["cover"][cover_df["reef_siteid"] == sites[si]]
 
+    store_cover = np.zeros((len(sites), int(len(species)*6)))
+    bin_edges = [0, 2, 5, 10, 20, 40, 90]
+    x = [(k/2)**2*np.pi for k in bin_edges]
+    weights_cdf = lognorm.cdf(x, np.log(4),loc=0,scale=700)
+    weights_cdf  =  weights_cdf[1:]- weights_cdf[0:-1]
+    weights = weights_cdf/sum(weights_cdf)
+    for si in range(len(sites)):store_cover[si, :] = np.hstack(np.vstack(np.transpose(np.outer(weights,np.array(cover_df["cover"][cover_df["reef_siteid"] == sites[si]])))))
     return store_cover
 
 
