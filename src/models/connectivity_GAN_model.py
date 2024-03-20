@@ -49,6 +49,7 @@ def connectivity_model(
         conn_data_store, conn_orig, site_data
     )
     data_cols = conn_data_store.columns
+
     ### ---------------------------------------Train model-------------------------------------------------------###
     if model_type == "GaussianCopula":
         metadata_conn = SingleTableMetadata()
@@ -63,8 +64,11 @@ def connectivity_model(
         model.fit(conn_data_store)
 
         conn_samples = model.sample(num_rows=216)
+        conn_samples = pd.DataFrame(
+            scaler.inverse_transform(conn_samples[data_cols]), columns=data_cols
+        )
 
-    if model_type == "GAN":
+    elif model_type == "GAN":
         # Define the GAN and training parameters
 
         noise_dim = 32
@@ -108,7 +112,6 @@ def connectivity_model(
     selected_conn_data = find_NN_conn_data(
         site_data_synth, conn_samples, conn_data_store
     )
-
     selected_conn_data = anonymize_conn(site_data_synth, selected_conn_data)
     synth_conn_fn = retrieve_synth_conn_data_fp(root_site_data_synth)
 
