@@ -58,7 +58,7 @@ metadata_ub = {
 }
 
 c_dir = "C:\\Users\\rcrocker\\Documents\\GitHub\\ADRIA-synthetic-data\\synthetic_data\\"
-synth_id = "synth_2023-7-24_152038"
+synth_id = "synth_2024-3-5_81235"
 synth_lat_longs = gp.read_file(
     c_dir
     + "synthetic_data_packages\\"
@@ -72,23 +72,13 @@ anon_lat = synth_lat_longs["geometry"].centroid.y
 
 breakpoint()
 # site data plotting
-site_data_orig = pd.read_csv(
-    c_dir + "site_data_orig_plotting_" + synth_id + ".csv", index_col=False
-)
-site_data_sampled = pd.read_csv(
-    c_dir + "site_data_samp_plotting_" + synth_id + ".csv", index_col=False
-)
-site_data_synth = pd.read_csv(
-    c_dir + "site_data_synth_plotting_" + synth_id + ".csv", index_col=False
-)
+site_data_orig = pd.read_csv(c_dir + "site_data_orig_plotting_" + synth_id + ".csv", index_col=False)
+site_data_sampled = pd.read_csv(c_dir + "site_data_samp_plotting_" + synth_id + ".csv", index_col=False)
+site_data_synth = pd.read_csv(c_dir + "site_data_synth_plotting_" + synth_id + ".csv", index_col=False)
 breakpoint()
 metadata_site = SingleTableMetadata()
-metadata_site.detect_from_dataframe(data=site_data_orig)
-quality_report = evaluate_quality(
-    real_data=site_data_orig,
-    synthetic_data=site_data_synth[site_data_orig.columns],
-    metadata=metadata_site,
-)
+metadata_site.detect_from_dataframe(data=site_data_orig[site_data_orig.columns[1:]])
+quality_report = evaluate_quality(real_data=site_data_orig[site_data_orig.columns[1:]],synthetic_data=site_data_synth[site_data_orig.columns[1:]],metadata=metadata_site)
 diag_report = run_diagnostic(
     real_data=site_data_orig,
     synthetic_data=site_data_synth[site_data_orig.columns],
@@ -153,15 +143,15 @@ figs_cover_2 = plot_comparison_hist_covers(
 breakpoint()
 # connectivity data plotting
 conn_data_orig = pd.read_csv(
-    c_dir + "connectivity_orig_plotting_synth_16-6-2023_91140.csv",
+    c_dir + "connectivity_orig_plotting_"+synth_id+".csv",
     index_col=False,
     dtype=np.float64,
 )
 conn_data_sampled = pd.read_csv(
-    c_dir + "connectivity_samp_plotting_synth_16-6-2023_91140.csv", index_col=False
+    c_dir + "connectivity_samp_plotting_"+synth_id+".csv", index_col=False
 )
 conn_data_synth = pd.read_csv(
-    c_dir + "connectivity_synth_plotting_synth_16-6-2023_91140.csv",
+    c_dir + "connectivity_synth_plotting_"+synth_id+".csv",
     index_col=False,
     dtype=np.float64,
 )
@@ -222,13 +212,13 @@ correlation_heatmap(
 breakpoint()
 # dhw data plotting
 dhw_data_orig = pd.read_csv(
-    c_dir + "dhw_orig_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "dhw_orig_plotting_"+synth_id+".csv", index_col=False
 )
 dhw_data_sampled = pd.read_csv(
-    c_dir + "dhw_samp_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "dhw_samp_plotting_"+synth_id+".csv", index_col=False
 )
 dhw_data_synth = pd.read_csv(
-    c_dir + "dhw_synth_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "dhw_synth_plotting_"+synth_id+".csv", index_col=False
 )
 
 report = QualityReport()
@@ -281,13 +271,13 @@ go.Figure(fig_synth_sel).show()
 breakpoint()
 # wave data plotting
 wave_data_orig = pd.read_csv(
-    c_dir + "Ub_orig_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "Ub_orig_plotting_"+synth_id+".csv", index_col=False
 )
 wave_data_sampled = pd.read_csv(
-    c_dir + "Ub_samp_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "Ub_samp_plotting_"+synth_id+".csv", index_col=False
 )
 wave_data_synth = pd.read_csv(
-    c_dir + "Ub_synth_plotting_16-6-2023_91140.csv", index_col=False
+    c_dir + "Ub_synth_plotting_"+synth_id+".csv", index_col=False
 )
 report = QualityReport()
 report.generate(
