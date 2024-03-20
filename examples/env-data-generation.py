@@ -44,33 +44,25 @@ new_data_env["year"] = [int(yr) for yr in new_data_env.year]
 
 metadata_env = SingleTableMetadata()
 metadata_env.detect_from_dataframe(data=env_df[env_df.columns[[0, 1, 2, 3, 5]]])
-quality_report = evaluate_quality(
-    real_data=env_df[env_df.columns[[0, 1, 2, 3, 5]]],
-    synthetic_data=new_data_env,
-    metadata=metadata_env,
-)
+quality_report = evaluate_quality(real_data=env_df[env_df.columns[[0, 1, 2, 3, 5]]],synthetic_data=new_data_env,metadata=metadata_env,)
 
 
 ### ------------------------------------------ Plot data as timeseries ----------------------------------------- ###
 
 outcomes_data, outcomes_synth = get_data_quantiles(env_df, new_data_env, nyears, layer)
 breakpoint()
-fig_data = create_timeseries(
-    outcomes_data, old_years, layer, label="Original " + layer + " Data"
-)
+fig_data = create_timeseries(outcomes_data, np.unique(old_years), layer, label="Original " + layer + " Data")
 go.Figure(fig_data).show()
 
-fig_synth = create_timeseries(outcomes_synth, label="Synthetic " + layer + " Data")
+fig_synth = create_timeseries(outcomes_synth, np.unique(old_years), layer, label="Original " + layer + " Data")
 go.Figure(fig_synth).show()
 
 ### ----------------------------------------------- Plot sampled data ------------------------------------------ ###
 new_years = [str(int(yr)) for yr in selected_env_data["year"]]
-outcomes_data, outcomes_synth_selected = get_data_quantiles(
-    env_df, selected_env_data, nyears, old_years, new_years, layer
-)
+outcomes_data, outcomes_synth_selected = get_data_quantiles(env_df, selected_env_data, nyears, layer)
 
 fig_synth = create_timeseries(
-    outcomes_synth_selected, label="Synthetic sampled " + layer + " data"
+    outcomes_synth_selected, np.unique(old_years), layerlabel="Synthetic sampled " + layer + " data"
 )
 go.Figure(fig_synth).show()
 
