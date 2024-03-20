@@ -65,7 +65,6 @@ def retrieve_orig_conn_fp(orig_data_package, year, num):
         ORIG_DATA_DIR
         + orig_data_package
         + "\\connectivity\\"
-        + year
         + "\\connect_matrix_"
         + year
         + "_"
