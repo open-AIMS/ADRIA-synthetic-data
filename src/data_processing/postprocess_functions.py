@@ -165,3 +165,14 @@ def create_cover_nc(store_cover, fn):
     reef_siteid[:] = np.array(["reef_" + str(ii) for ii in range(1, n_sites + 1)])
 
     ds.close()
+
+def proportional_adjustment(cover_mat, k):
+    cover_tmp = np.sum(cover_mat, axis=1)
+    k=k/100.0
+    if any(cover_tmp > k):
+        coral_cover = copy.deepcopy(cover_mat)
+        coral_cover[k==0.0] = 0.0
+        exceeded = np.sum(coral_cover, axis=1) > k
+        coral_cover[exceeded] = np.transpose(np.transpose(coral_cover[exceeded]) * (np.array(k[exceeded])/cover_tmp[exceeded]))
+
+    return coral_cover
