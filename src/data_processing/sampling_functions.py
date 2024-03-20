@@ -56,8 +56,8 @@ def sample_rand_radii(new_site_data, nrand_sites, n_gen):
     return conditions
 
 
-def create_cover_conditional_struct(site_data_synth, nspecies):
-    size = nspecies * site_data_synth.shape[0]
+def create_cover_conditional_struct(site_data_synth, ngroups):
+    size =  ngroups * site_data_synth.shape[0]
     conditions = pd.DataFrame(
         {
             "species": [0] * size,
@@ -67,7 +67,8 @@ def create_cover_conditional_struct(site_data_synth, nspecies):
         }
     )
     count = 0
-    for sp in range(nspecies):
+
+    for sp in range(ngroups):
         for si in range(site_data_synth.shape[0]):
             conditions["species"][count] = sp + 1
             conditions["reef_siteid"][count] = site_data_synth["reef_siteid"][si]
