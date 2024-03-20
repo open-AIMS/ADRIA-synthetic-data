@@ -11,8 +11,7 @@ from src.data_processing.package_synth_data import (
     retrieve_synth_cover_fp,
 )
 from src.data_processing.sampling_functions import create_cover_conditional_struct
-from src.data_processing.postprocess_functions import make_cover_array, create_cover_nc
-from src.data_processing.postprocess_functions import convert_to_geo
+from src.data_processing.postprocess_functions import make_cover_array, create_cover_nc,convert_to_geo,proportional_adjustment
 
 
 ###---------------------------------------Load site data to synethesize------------------------------------------###
@@ -31,26 +30,24 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
 
     ###----------------------------------Fit and save fastML model for site data-------------------------------------###
     cover_df["lat"] = -1 * cover_df["lat"]
+    cover_df = cover_df.drop(["site_id"],axis=1)
     metadata_cover = SingleTableMetadata()
     metadata_cover.detect_from_dataframe(data=cover_df)
     metadata_cover.update_column(column_name="species", sdtype="categorical")
-    metadata_cover.update_column(column_name="site_id", sdtype="categorical")
 
-    model = TVAESynthesizer(metadata_cover)
+    model = TVAESynthesizer(metadata_cover, enforce_min_max_values=True,enforce_rounding=True,epochs=1000)
     model.fit(cover_df)
     synth_cover = model.sample(num_rows=N)
 
     ###----------Sample conditional dist, based on synthetic lats and longs and requirement of species types---------###
-    conditions = create_cover_conditional_struct(
-        site_data_synth, max(cover_df["species"])
-    )
+    conditions = create_cover_conditional_struct(site_data_synth, max(cover_df["species"]))
 
-    synth_sampled = model.sample_remaining_columns(
-        conditions[["species", "lat", "long"]], max_tries_per_batch=2000
-    )
+    synth_sampled = model.sample_remaining_columns(conditions[["species", "lat", "long"]], max_tries_per_batch=8000)
 
     synth_sampled["reef_siteid"] = conditions["reef_siteid"]
+
     array_synth_sampled = make_cover_array(synth_sampled)
+    array_synth_sampled = proportional_adjustment(array_synth_sampled, site_data_synth.k)
     cover_fn = retrieve_synth_cover_fp(root_site_data_synth[0:-4])
     create_cover_nc(array_synth_sampled, cover_fn)
 
