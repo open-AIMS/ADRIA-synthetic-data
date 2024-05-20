@@ -20,11 +20,13 @@ sys.path.append("..")
 from src.plotting.data_comparison_plots import (
     comparison_plots_site_data,
     plot_comparison_hist_covers,
+    plot_comparison_hist,
     compared_cover_species_hist,
     pca_correlation,
     plot_pca,
     correlation_distance,
     correlation_heatmap,
+    correlation_diff_heatmap,
     plot_mean_std,
     get_data_quantiles,
     create_timeseries,
@@ -119,7 +121,7 @@ for k in range(len(site_ids)):
         cover_data_sampled["cover"][cover_data_sampled["reef_siteid"] == site_ids[k]]
     )
 
-site_ids = np.unique(cover_data_orig["site_id"])
+site_ids = np.unique(cover_data_orig["lat"])
 covers_sum_orig = np.zeros(len(site_ids))
 for k in range(len(site_ids)):
     covers_sum_orig[k] = sum(
@@ -180,11 +182,8 @@ corr_orig, corr_synth, corr_samp = correlation_distance(
     [],
 )
 
-correlation_heatmap(
-    corr_orig.astype(float).values,
-    corr_synth.astype(float).values,
-    corr_samp.astype(float).values,
-)
+correlation_heatmap(corr_orig.astype(float).values,corr_synth.astype(float).values,corr_samp.astype(float).values,)
+correlation_diff_heatmap(corr_orig.astype(float).values,corr_synth.astype(float).values,)
 
 # coverage = np.zeros((len(conn_data_orig.columns), 1))
 # boundaries = np.zeros((len(conn_data_orig.columns), 1))
@@ -262,7 +261,7 @@ breakpoint()
 wave_data_orig = pd.read_csv(
     c_dir + "Ub_orig_plotting_"+synth_id+".csv", index_col=False
 )
-wave_data_sampled = pd.read_csv(
+
     c_dir + "Ub_samp_plotting_"+synth_id+".csv", index_col=False
 )
 wave_data_synth = pd.read_csv(
