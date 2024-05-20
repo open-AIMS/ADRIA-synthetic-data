@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 from sklearn.decomposition import PCA
 
-# from dython.nominal import associations
+from dython.nominal import associations
 
 
 def plot_comparison_scatter(sample_sites, new_site_data, site_data):
@@ -72,12 +72,14 @@ def plot_comparison_hist_covers(cover_orig, cover_samp):
 
     axes[0].hist(
         cover_orig,
+        weights=np.ones(len(cover_orig))/len(cover_orig),
         bins=round(np.sqrt(cover_orig.shape[0])),
         color="purple",
         lw=0,
     )
     axes[1].hist(
         cover_samp,
+        weights=np.ones(len(cover_samp))/len(cover_samp),
         bins=round(np.sqrt(cover_samp.shape[0])),
         color="pink",
         lw=0,
@@ -85,13 +87,15 @@ def plot_comparison_hist_covers(cover_orig, cover_samp):
 
     axes[0].set_title("Original", fontsize=28)
     axes[1].set_title("Sampled", fontsize=28)
-    axes[0].set_ylabel("Number of sites", fontsize=22)
+    axes[0].set_ylabel("density", fontsize=22)
     for ax_n in range(2):
         axes[ax_n].set_xlabel("relative coral cover", fontsize=22)
         axes[ax_n].yaxis.set_tick_params(labelsize=15, rotation=25)
         axes[ax_n].xaxis.set_tick_params(labelsize=15, rotation=25)
         axes[ax_n].yaxis.set_major_formatter(plt.FormatStrFormatter("%.2f"))
         axes[ax_n].xaxis.set_major_formatter(plt.FormatStrFormatter("%.2f"))
+        axes[ax_n].set_ylim([0.0, y_max+0.02*y_max])
+        axes[ax_n].set_xlim([0.0, x_max+0.02*x_max])
 
     fig.show()
     return fig
@@ -137,7 +141,8 @@ def plot_comparison_hist(sample_sites, new_site_data, site_data, parameter, labe
         axes[ax_n].set_xlabel(label_name, fontsize=26)
         axes[ax_n].yaxis.set_tick_params(labelsize=20, rotation=25)
         axes[ax_n].xaxis.set_tick_params(labelsize=20, rotation=25)
-        axes[ax_n].yaxis.set_major_formatter(plt.FormatStrFormatter("%.2f"))
+        axes[ax_n].set_ylim([0.0, y_max+0.02*y_max])
+        #axes[ax_n].yaxis.set_major_formatter(plt.FormatStrFormatter("%.2f"))
 
     fig.show()
     return fig
@@ -294,20 +299,20 @@ def comparison_plots_site_data(sample_sites, new_site_data, site_data):
 def compared_cover_species_hist(cover_df, synth_cover, synth_sampled):
     synth_sampled_cover = [
         sum(synth_sampled.cover[synth_sampled.species == k]) / sum(synth_sampled.cover)
-        for k in range(1, 37)
+        for k in range(1, 7)
     ]
     synth_cover = [
         sum(synth_cover.cover[synth_cover.species == k]) / sum(synth_cover.cover)
-        for k in range(1, 37)
+        for k in range(1, 7)
     ]
     orig_cover = [
         sum(cover_df.cover[cover_df.species == k]) / sum(cover_df.cover)
-        for k in range(1, 37)
+        for k in range(1, 7)
     ]
 
     cover_species_df = pd.DataFrame(
         {
-            "Species": np.array([str(k) for k in range(1, 37)]),
+            "Species": np.array([str(k) for k in range(1, 7)]),
             "Original": orig_cover,
             "Synthetic": synth_cover,
             "Sampled": synth_sampled_cover,
@@ -317,7 +322,6 @@ def compared_cover_species_hist(cover_df, synth_cover, synth_sampled):
     cover_species_df.plot(
         x="Species",
         kind="bar",
-        stacked=True,
         color=["skyblue", "purple", "pink"],
     )
     plt.xticks(rotation="horizontal", fontsize=18)
@@ -508,6 +512,19 @@ def correlation_heatmap(real_corr, fake_corr, samp_corr):
     g3.set_xticks(np.arange(1, samp_corr.shape[0], 10))
     g3.set_yticklabels(g3.get_yticks(), size=18)
     g3.set_xticklabels(g3.get_xticks(), size=18)
+
+    plt.show()
+    return
+
+def correlation_diff_heatmap(real_corr, fake_corr):
+    plt.plot()
+    g1 = sns.heatmap(real_corr-fake_corr, cmap="YlGnBu", cbar=False, vmin=0, vmax=1)
+    g1.set_ylabel("to", size=20)
+    g1.set_xlabel("from", size=20)
+    g1.set_xticks(np.arange(1, real_corr.shape[0], 10))
+    g1.set_yticks(np.arange(1, real_corr.shape[0], 10))
+    g1.set_xticklabels(g1.get_xticks(), size=18)
+    g1.set_yticklabels(g1.get_yticks(), size=18)
 
     plt.show()
     return
