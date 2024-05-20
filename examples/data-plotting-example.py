@@ -44,20 +44,10 @@ metadata_dhw = {
     "sequence_index": "year",
 }
 
-metadata_ub = {
-    "fields": {
-        "year": {"type": "numerical"},
-        "lat": {"type": "numerical", "subtype": "float"},
-        "long": {"type": "numerical", "subtype": "float"},
-        "site": {"type": "categorical"},
-        "Ub": {"type": "numerical", "subtype": "float"},
-    },
-    "context_columns": ["site"],
-    "entity_columns": ["lat", "long"],
-    "sequence_index": "year",
-}
+metadata_ub = {"columns": { "year": {"sdtype": "datetime"},"lat": {"sdtype": "numerical", "subtype": "float"},"long": {"sdtype": "numerical", "subtype": "float"},"site": {"sdtype": "id"},"Ub": {"sdtype": "numerical", "subtype": "float"},},"sequence_key": "site","entity_columns": ["lat", "long"],"sequence_index": "year",}
 
 c_dir = "C:\\Users\\rcrocker\\Documents\\GitHub\\ADRIA-synthetic-data\\synthetic_data\\"
+# synth_id = "synth_2024-4-4_123411"
 synth_id = "synth_2024-3-5_81235"
 synth_lat_longs = gp.read_file(
     c_dir
