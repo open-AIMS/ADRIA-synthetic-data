@@ -142,6 +142,8 @@ def preprocess_cover_data(cc_data, site_data):
             cc_df["cover"][count] = sum(cc_data["covers"][si, int(sp*6):int(sp*6)+5])
             count += 1
 
+    weights = [np.mean(cc_data["covers"][:,np.array([0,6,12,18,24,30]) + cl]) for cl in range(6)]
+    weights = weights/np.sum(weights)
     # create metadata dictionary
     metadata_cc = {
         "fields": {
@@ -154,7 +156,7 @@ def preprocess_cover_data(cc_data, site_data):
         "primary_key": "site_id",
     }
 
-    return cc_df, metadata_cc
+    return cc_df, metadata_cc, weights
 
 
 def tide_dist(latlong_site1, latlong_site2):

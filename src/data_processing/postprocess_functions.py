@@ -128,7 +128,7 @@ def create_env_nc(store_env, lats, longs, site_ids, layer, fn):
     ds.close()
 
 
-def make_cover_array(cover_df):
+def make_cover_array(cover_df, weights):
     """
     Create array from synthetically generated coral cover dataframe to be packages as netcdf.
 
@@ -140,11 +140,12 @@ def make_cover_array(cover_df):
     species = cover_df["species"].unique()
 
     store_cover = np.zeros((len(sites), int(len(species)*6)))
-    bin_edges = [0, 2, 5, 10, 20, 40, 90]
-    x = [(k/2)**2*np.pi for k in bin_edges]
-    weights_cdf = lognorm.cdf(x, np.log(4),loc=0,scale=700)
-    weights_cdf  =  weights_cdf[1:]- weights_cdf[0:-1]
-    weights = weights_cdf/sum(weights_cdf)
+    # bin_edges = [0, 2, 5, 10, 20, 40, 90]
+    # x = [(k/2)**2*np.pi for k in bin_edges]
+    # weights_cdf = lognorm.cdf(x, np.log(4),loc=0,scale=700)
+    # weights_cdf  =  weights_cdf[1:]- weights_cdf[0:-1]
+    # weights = weights_cdf/sum(weights_cdf)
+
     for si in range(len(sites)):store_cover[si, :] = np.hstack(np.vstack(np.transpose(np.outer(weights,np.array(cover_df["cover"][cover_df["reef_siteid"] == sites[si]])))))
     return store_cover
 
@@ -178,6 +179,6 @@ def proportional_adjustment(cover_mat, k):
         coral_cover = copy.deepcopy(cover_mat)
         coral_cover[k==0.0] = 0.0
         exceeded = np.sum(coral_cover, axis=1) > k
-        coral_cover[exceeded] = np.transpose(np.transpose(coral_cover[exceeded]) * (np.array(k[exceeded])/cover_tmp[exceeded]))
+        coral_cover[exceeded] = np.transpose(np.transpose(coral_cover[exceeded]) * np.array(k[exceeded]))
 
     return coral_cover
