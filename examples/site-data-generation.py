@@ -24,6 +24,7 @@ tic = time.perf_counter()
     site_data,
     new_site_data,
     sample_sites,
+    sample_sites_anon,
     metadata_site,
     synth_site_data_fn,
 ) = site_data_model(orig_data_package, N1, N2, N3)
@@ -44,7 +45,7 @@ quality_report = evaluate_quality(
 cols = new_site_data.columns
 
 ### ------------------------------ Visual data comparison using plotting tools --------------------------------- ###
-figs = comparison_plots_site_data(sample_sites, new_site_data, site_data)
+figs = comparison_plots_site_data(sample_sites_anon, new_site_data, site_data)
 
 file_name = synth_site_data_fn.split("\\")[10]
 save_csv_plotting(site_data, new_site_data, sample_sites, file_name[:-5], "site_data")

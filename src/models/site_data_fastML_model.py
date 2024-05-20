@@ -79,4 +79,6 @@ def site_data_model(orig_data_package, N, N2, N3):
     synth_site_data_fn = create_synth_site_data_package_fp(time_stamp)
     sample_sites_anon.to_file(synth_site_data_fn, driver="GPKG", index=False)
 
-    return site_data, new_site_data, sample_sites, metadata_site, synth_site_data_fn
+    sample_sites_anon["lat"] = sample_sites_anon.centroid.y
+    sample_sites_anon["long"] = sample_sites_anon.centroid.x
+    return site_data, new_site_data, sample_sites, sample_sites_anon, metadata_site, synth_site_data_fn
