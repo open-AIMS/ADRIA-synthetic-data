@@ -100,8 +100,8 @@ figs_cover = compared_cover_species_hist(
 breakpoint()
 metadata_cc = SingleTableMetadata()
 metadata_cc.detect_from_dataframe(data=cover_data_orig)
-quality_report = evaluate_quality(
-    real_data=cover_data_orig,
+metadata_cc.update_column(column_name='species',sdtype='categorical')
+quality_report = evaluate_quality(real_data=cover_data_orig,synthetic_data=cover_data_synth,metadata=metadata_cc,)
     synthetic_data=cover_data_synth,
     metadata=metadata_cc,
 )
@@ -146,11 +146,10 @@ conn_data_synth = pd.read_csv(
     dtype=np.float64,
 )
 
-conn_fields = {
-    kk: {"type": "numerical", "subtype": "float"} for kk in conn_data_orig.columns
+conn_fields = {kk: {"sdtype": "numerical", "subtype": "float"} for kk in conn_data_orig.columns}
 }
 # create metadata dictionary
-metadata_conn = {"fields": conn_fields, "primary_key": "recieving_site"}
+metadata_conn = {"columns": conn_fields, "primary_key": "recieving_site"}
 
 plot_pca(
     conn_data_orig,
