@@ -1,6 +1,6 @@
 import pandas as pd
 import netCDF4
-from sdv.single_table import TVAESynthesizer
+from sdv.single_table import GaussianCopulaSynthesizer
 from sdv.metadata import SingleTableMetadata
 
 from src.data_processing.preprocess_functions import preprocess_cover_data
@@ -26,7 +26,7 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
 
     ###----------------------------------Preprocess data for sdv.fastML model fit------------------------------------###
     # simplify to dataframe
-    cover_df, metadata_cover = preprocess_cover_data(cover_orig, site_data_orig)
+    cover_df, metadata_cover, weights = preprocess_cover_data(cover_orig, site_data_orig)
 
     ###----------------------------------Fit and save fastML model for site data-------------------------------------###
     cover_df["lat"] = -1 * cover_df["lat"]
@@ -35,7 +35,8 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
     metadata_cover.detect_from_dataframe(data=cover_df)
     metadata_cover.update_column(column_name="species", sdtype="categorical")
 
-    model = TVAESynthesizer(metadata_cover, enforce_min_max_values=True,enforce_rounding=True,epochs=1000)
+    model = GaussianCopulaSynthesizer(metadata_cover)
+
     model.fit(cover_df)
     synth_cover = model.sample(num_rows=N)
 
@@ -46,7 +47,7 @@ def coral_cover_model(root_original_file, root_site_data_synth, N):
 
     synth_sampled["reef_siteid"] = conditions["reef_siteid"]
 
-    array_synth_sampled = make_cover_array(synth_sampled)
+    array_synth_sampled = make_cover_array(synth_sampled, weights)
     array_synth_sampled = proportional_adjustment(array_synth_sampled, site_data_synth.k)
     cover_fn = retrieve_synth_cover_fp(root_site_data_synth[0:-4])
     create_cover_nc(array_synth_sampled, cover_fn)
