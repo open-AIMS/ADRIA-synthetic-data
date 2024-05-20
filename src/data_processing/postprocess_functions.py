@@ -37,10 +37,9 @@ def anonymize_spatial(site_data_geo_synth):
     :param geodataframe site_data_geo_synth: synthetic site data with geometry in epsg3395
 
     """
-    site_data_geo_synth["geometry"] = site_data_geo_synth.translate(
-        rd.uniform(-1e10, 1e10), rd.uniform(-1e10, 1e10)
-    )
-    site_data_geo_synth = site_data_geo_synth.to_crs({"init": "epsg:4326"})
+    site_data_geo_synth = site_data_geo_synth.to_crs("epsg:3395")
+    site_data_geo_synth["geometry"] = site_data_geo_synth.translate(rd.uniform(-1e7, 1e7), rd.uniform(-1e7, 1e7))
+    site_data_geo_synth = site_data_geo_synth.to_crs("epsg:4326")
 
     return site_data_geo_synth
 
