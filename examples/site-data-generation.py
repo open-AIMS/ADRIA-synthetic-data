@@ -1,5 +1,5 @@
 import sys
-
+import time
 sys.path.append("..")
 
 # from sdmetrics.reports.single_table import QualityReport
@@ -19,7 +19,7 @@ N2 = 130  # estimate of final number of sites (final number may be slightly less
 N3 = 10  #  number of sites to generate positions in local radii around
 
 orig_data_package = "Moore_2022-11-17"
-
+tic = time.perf_counter()
 (
     site_data,
     new_site_data,
@@ -27,6 +27,9 @@ orig_data_package = "Moore_2022-11-17"
     metadata_site,
     synth_site_data_fn,
 ) = site_data_model(orig_data_package, N1, N2, N3)
+toc = time.perf_counter()
+print(f"Model learnt in {toc - tic:0.4f} seconds")
+
 breakpoint()
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
 

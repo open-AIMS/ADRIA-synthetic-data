@@ -1,4 +1,5 @@
 import sys
+import time
 import plotly.graph_objects as go
 
 sys.path.append("..")
@@ -23,7 +24,7 @@ root_site_data_synth = "synth_2023-7-24_152038.csv"
 nsamples = 10
 # replicates = [10, 38, 41, 42, 45]  # dhw
 replicates = [1, 5, 13, 16, 45]  # waves
-
+tic = time.perf_counter()
 (
     env_df,
     new_data_env,
@@ -34,6 +35,8 @@ replicates = [1, 5, 13, 16, 45]  # waves
 ) = env_data_model(
     root_original_file, root_site_data_synth, nsamples, replicates, rcp, layer
 )
+toc = time.perf_counter()
+print(f"Model learnt in {toc - tic:0.4f} seconds")
 breakpoint()
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
 

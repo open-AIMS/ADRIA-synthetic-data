@@ -1,5 +1,5 @@
 import sys
-
+import time
 sys.path.append("..")
 
 from src.models.connectivity_GAN_model import connectivity_model
@@ -14,6 +14,7 @@ root_site_data_synth = "synth_2023-7-24_152038.csv"
 years = ["2015", "2016", "2017"]  # connectivity data years to use
 num = ["1", "2", "3"]  # connectivity data sample number to use
 model_type = "GaussianCopula" # "GAN"
+tic = time.perf_counter()
 (
     conn_orig,
     conn_samples,
@@ -21,6 +22,8 @@ model_type = "GaussianCopula" # "GAN"
     metadata_conn,
     synth_conn_fn,
 ) = connectivity_model(root_original_file, root_site_data_synth, years, num, model_type)
+toc = time.perf_counter()
+print(f"Model learnt in {toc - tic:0.4f} seconds")
 breakpoint()
 
 ### ------------------------------------Test synthetic data utility-------------------------------------------- ###

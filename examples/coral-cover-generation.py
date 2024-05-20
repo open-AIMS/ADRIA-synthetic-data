@@ -1,4 +1,5 @@
 import sys
+import time
 
 sys.path.append("..")
 
@@ -16,6 +17,7 @@ root_original_file = "Moore_2022-11-17"
 root_site_data_synth = "synth_2023-7-24_152038.csv"
 N = 300  # initial sample of sites to draw
 
+tic = time.perf_counter()
 (
     cover_df,
     synth_cover,
@@ -23,6 +25,10 @@ N = 300  # initial sample of sites to draw
     metadata_cover,
     root_site_data_synth,
 ) = coral_cover_model(root_original_file, root_site_data_synth, N)
+
+toc = time.perf_counter()
+print(f"Model learnt in {toc - tic:0.4f} seconds")
+
 breakpoint()
 ### --------------- Evaluate synthetic data and sampled data utility and generate quality report --------------- ###
 quality_report = evaluate_quality(
