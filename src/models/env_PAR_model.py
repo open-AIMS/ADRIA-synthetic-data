@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 
 from deepecho import PARModel
+#from sdv.sequential import PARSynthesizer
+from sdv.metadata import SingleTableMetadata
 import netCDF4
 
 from src.data_processing.preprocess_functions import (
@@ -42,9 +44,15 @@ def env_data_model(
     for rep in replicates:
         temp_env_df = env_df[env_df["rep"] == rep]
         model = PARModel(epochs=1024, cuda=False)
+        # metadata_env = SingleTableMetadata()
+        # metadata_env.detect_from_dataframe(data=temp_env_df.loc[:, temp_env_df.columns != "rep"])
+        # metadata_env.set_sequence_index(column_name='year')
+        # metadata_env.update_column(column_name='site',sdtype='id')
+        # metadata_env.set_sequence_key(column_name='site')
+        # breakpoint()
+        # model = PARSynthesizer(metadata_env, epochs=1024, cuda=False, context_columns=["lat", "long"])
 
-        model.fit(
-            data=temp_env_df.loc[:, temp_env_df.columns != "rep"],
+        model.fit(data=temp_env_df.loc[:, temp_env_df.columns != "rep"],
             context_columns=["lat", "long"],
             entity_columns=["site"],
             data_types=data_types,
