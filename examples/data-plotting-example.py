@@ -258,9 +258,9 @@ go.Figure(fig_synth_sel).show()
 
 breakpoint()
 # wave data plotting
-wave_data_orig = pd.read_csv(
-    c_dir + "Ub_orig_plotting_"+synth_id+".csv", index_col=False
-)
+wave_data_orig = pd.read_csv(c_dir + "Ub_orig_plotting_"+synth_id+".csv", index_col=False)
+wave_data_sampled = pd.read_csv(c_dir + "Ub_samp_plotting_"+synth_id+".csv", index_col=False)
+wave_data_synth = pd.read_csv(c_dir + "Ub_synth_plotting_"+synth_id+".csv", index_col=False)
 
     c_dir + "Ub_samp_plotting_"+synth_id+".csv", index_col=False
 )
