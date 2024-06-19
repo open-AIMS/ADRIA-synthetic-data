@@ -117,7 +117,8 @@ def preprocess_cover_data(cc_data, site_data):
     :param numpy array cc_data: contains original dhw or wave data, loaded from nc file.
 
     """
-    nsites, nspecies = cc_data["covers"].shape
+
+    nsites, nspecies = cc_data["layer"].shape
     ngroups = int((nspecies/6))
     size =  ngroups * nsites
 
@@ -139,10 +140,10 @@ def preprocess_cover_data(cc_data, site_data):
             cc_df["lat"][count] = site_data["lat"][si]
             cc_df["long"][count] = site_data["long"][si]
             cc_df["species"][count] = sp + 1
-            cc_df["cover"][count] = sum(cc_data["covers"][si, int(sp*6):int(sp*6)+5])
+            cc_df["cover"][count] = sum(cc_data["layer"][si, int(sp*6):int(sp*6)+5])
             count += 1
 
-    weights = [np.mean(cc_data["covers"][:,np.array([0,6,12,18,24,30]) + cl]) for cl in range(6)]
+    weights = [np.mean(cc_data["layer"][:,np.array([0,6,12,18,24,30]) + cl]) for cl in range(6)]
     weights = weights/np.sum(weights)
     # create metadata dictionary
     metadata_cc = {

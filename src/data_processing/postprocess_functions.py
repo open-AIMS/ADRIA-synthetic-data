@@ -161,11 +161,11 @@ def create_cover_nc(store_cover, fn):
     n_sites = store_cover.shape[0]
     n_species = store_cover.shape[1]
     ds = nc.Dataset(fn, "w")
-    ds.createDimension("reef_siteid", n_sites)
+    ds.createDimension("locations", n_sites)
     ds.createDimension("species", n_species)
 
-    covers = ds.createVariable("covers", "f4", ("reef_siteid", "species"))
-    reef_siteid = ds.createVariable("reef_siteid", str, ("reef_siteid",))
+    covers = ds.createVariable("layer", "f4", ("locations", "species"))
+    reef_siteid = ds.createVariable("locations", str, ("locations",))
 
     covers[:, :] = store_cover
     reef_siteid[:] = np.array(["reef_" + str(ii) for ii in range(1, n_sites + 1)])

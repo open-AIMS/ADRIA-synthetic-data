@@ -11,7 +11,7 @@ ORIG_DATA_DIR = file_dir[:-19] + "original_data\\"
 def initialize_data_package(time_stamp):
     synth_data_set_folder = SYNTH_DATA_PACKAGE_DIR + "synth_" + time_stamp
 
-    SITE_DATA_DIR = os.path.join(synth_data_set_folder, "site_data")
+    SITE_DATA_DIR = os.path.join(synth_data_set_folder, "spatial")
     CONN_DATA_DIR = os.path.join(synth_data_set_folder, "connectivity", "2000")
     DHW_DATA_DIR = os.path.join(synth_data_set_folder, "DHWs")
     WAVE_DATA_DIR = os.path.join(synth_data_set_folder, "waves")
@@ -35,7 +35,7 @@ def create_synth_site_data_package_fp(time_stamp):
         SYNTH_DATA_PACKAGE_DIR
         + "synth_"
         + time_stamp
-        + "\\site_data\\"
+        + "\\spatial\\"
         + "synth_"
         + time_stamp
         + ".gpkg"
@@ -54,31 +54,32 @@ def retrieve_orig_site_data_fp(orig_data_package, file_type):
     return (
         ORIG_DATA_DIR
         + orig_data_package
-        + "\\site_data\\"
+        + "\\spatial\\"
         + orig_data_package
         + file_type
     )
 
 
 def retrieve_orig_conn_fp(orig_data_package, year, num):
+    reef_name = orig_data_package.split('_')[0]
     return (
         ORIG_DATA_DIR
         + orig_data_package
-        + "\\connectivity\\"
-        + "\\connect_matrix_"
-        + year
-        + "_"
+        + "\\connectivity"
+        +"\\" + reef_name
+        + "_" + year + "_d"
         + num
+        + "transfer_probability_matrix_wide_3d"
         + ".csv"
     )
 
 
 def retrieve_orig_cover_fp(orig_data_package):
-    return ORIG_DATA_DIR + orig_data_package + "\\site_data\\coral_cover.nc"
+    return ORIG_DATA_DIR + orig_data_package + "\\spatial\\coral_cover.nc"
 
 
 def retrieve_synth_cover_fp(synth_data_package):
-    return SYNTH_DATA_PACKAGE_DIR + synth_data_package + "\\site_data\\coral_cover.nc"
+    return SYNTH_DATA_PACKAGE_DIR + synth_data_package + "\\spatial\\coral_cover.nc"
 
 
 def retrieve_orig_env_fp(orig_data_package, rcp, layer):
@@ -121,7 +122,7 @@ def create_dp_jason(orig_data_package_path, synth_data_package_name):
     data["name"] = synth_data_package_name  # <--- add `id` value.
     data["title"] = "Synthetic data package"  # <--- add `id` value.
     data["description"] = "Data package synthesised from actual data package for ADRIA."
-    data["resources"][0]["path"] = "site_data\\" + synth_data_package_name + ".gpkg"
+    data["resources"][0]["path"] = "spatial\\" + synth_data_package_name + ".gpkg"
     data["resources"][1]["description"] = "Initial coral cover."
     data["resources"][2]["description"] = "Stochastic degree heating week data."
     data["resources"][3]["description"] = "Stochastic wave data."
