@@ -77,6 +77,7 @@ def site_data_model(orig_data_package, N, N2, N3):
 
     initialize_data_package(time_stamp)
     synth_site_data_fn = create_synth_site_data_package_fp(time_stamp)
+    sample_sites_anon = sample_sites_anon.set_crs(4326, inplace=True)
     sample_sites_anon.to_file(synth_site_data_fn, driver="GPKG", index=False)
 
     sample_sites_anon["lat"] = sample_sites_anon.centroid.y
